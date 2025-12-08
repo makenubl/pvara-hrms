@@ -17,31 +17,13 @@ import Learning from './pages/Learning';
 import Compliance from './pages/Compliance';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
-import Support from './pages/Support';
-import Status from './pages/Status';
-import Admin from './pages/Admin';
-import Integrations from './pages/Integrations';
-import RolesMatrix from './pages/RolesMatrix';
-import AccessReviews from './pages/AccessReviews';
-
-// SaaS Pages
-import Pricing from './pages/Pricing';
-import CompanyOnboarding from './pages/CompanyOnboarding';
-import SubscriptionManagement from './pages/SubscriptionManagement';
-import LandingPage from './pages/LandingPage';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuthStore();
-  const { isSubscriptionActive } = useCompanyStore();
   
   if (!token) {
     return <Navigate to="/login" replace />;
-  }
-
-  // Check subscription status for protected routes
-  if (!isSubscriptionActive()) {
-    return <Navigate to="/pricing" replace />;
   }
 
   return children;
@@ -73,13 +55,11 @@ function App() {
     <Router>
       <Toaster position="top-right" />
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Entry point - Login */}
+        <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/onboarding" element={<CompanyOnboarding />} />
 
-        {/* Protected Routes */}
+        {/* Protected HRMS Routes */}
         <Route
           path="/dashboard"
           element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
@@ -124,37 +104,9 @@ function App() {
           path="/settings"
           element={<ProtectedRoute><Settings /></ProtectedRoute>}
         />
-        <Route
-          path="/subscription"
-          element={<ProtectedRoute><SubscriptionManagement /></ProtectedRoute>}
-        />
-        <Route
-          path="/admin"
-          element={<ProtectedRoute><Admin /></ProtectedRoute>}
-        />
-        <Route
-          path="/integrations"
-          element={<ProtectedRoute><Integrations /></ProtectedRoute>}
-        />
-        <Route
-          path="/roles"
-          element={<ProtectedRoute><RolesMatrix /></ProtectedRoute>}
-        />
-        <Route
-          path="/access-reviews"
-          element={<ProtectedRoute><AccessReviews /></ProtectedRoute>}
-        />
-        <Route
-          path="/support"
-          element={<ProtectedRoute><Support /></ProtectedRoute>}
-        />
-        <Route
-          path="/status"
-          element={<ProtectedRoute><Status /></ProtectedRoute>}
-        />
 
-        {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Catch-all redirect to login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
