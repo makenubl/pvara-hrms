@@ -131,14 +131,14 @@ const Employees = () => {
       label: 'Actions',
       render: (value, row) => (
         <div className="flex gap-2">
-          <button className="p-1 hover:bg-blue-100 rounded" title="View">
-            <Eye size={16} className="text-blue-600" />
+          <button className="p-2 hover:bg-blue-500/20 hover:border-blue-400/50 border border-transparent rounded-lg transition-all" title="View">
+            <Eye size={16} className="text-blue-400" />
           </button>
-          <button className="p-1 hover:bg-yellow-100 rounded" title="Edit">
-            <Edit2 size={16} className="text-yellow-600" />
+          <button className="p-2 hover:bg-cyan-500/20 hover:border-cyan-400/50 border border-transparent rounded-lg transition-all" title="Edit">
+            <Edit2 size={16} className="text-cyan-400" />
           </button>
-          <button className="p-1 hover:bg-red-100 rounded" title="Delete">
-            <Trash2 size={16} className="text-red-600" />
+          <button className="p-2 hover:bg-red-500/20 hover:border-red-400/50 border border-transparent rounded-lg transition-all" title="Delete">
+            <Trash2 size={16} className="text-red-400" />
           </button>
         </div>
       ),
@@ -147,37 +147,50 @@ const Employees = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="space-y-6 pb-6">
+        {/* Header with gradient */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Employee Directory</h1>
-            <p className="text-gray-600">Manage and view all employees</p>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Employee Directory
+            </h1>
+            <p className="text-slate-400 mt-2">Manage and view all employees</p>
           </div>
-          <Button className="flex items-center gap-2" onClick={handleAddEmployee}>
-            <UserPlus size={20} />
-            Add Employee
-          </Button>
+          <button
+            onClick={handleAddEmployee}
+            className="group relative overflow-hidden rounded-xl py-3 px-6 text-sm font-semibold text-white bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-400/50 hover:border-cyan-400 hover:from-cyan-500/50 hover:to-blue-500/50 transition-all flex items-center gap-2"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/40 to-blue-500/40 opacity-0 group-hover:opacity-100 blur-lg transition-opacity"></div>
+            <UserPlus size={20} className="relative" />
+            <span className="relative">Add Employee</span>
+          </button>
         </div>
 
-        {/* Filters */}
-        <Card className="space-y-4">
-          <h3 className="font-semibold text-gray-800">Search & Filter</h3>
+        {/* Filters - Premium Glass Card */}
+        <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
+          <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+            <Filter size={18} className="text-cyan-400" />
+            Search & Filter
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Input
-              placeholder="Search by name, email, or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              icon={<Search size={18} />}
-            />
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by name, email, or ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400 transition-all"
+              />
+            </div>
             <select
               value={filterDept}
               onChange={(e) => setFilterDept(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 text-white transition-all"
             >
-              <option value="">All Departments</option>
+              <option value="" className="bg-slate-900">All Departments</option>
               {DEPARTMENTS.map((dept) => (
-                <option key={dept} value={dept}>
+                <option key={dept} value={dept} className="bg-slate-900">
                   {dept}
                 </option>
               ))}
@@ -185,61 +198,64 @@ const Employees = () => {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 text-white transition-all"
             >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="on_leave">On Leave</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
+              <option value="" className="bg-slate-900">All Status</option>
+              <option value="active" className="bg-slate-900">Active</option>
+              <option value="on_leave" className="bg-slate-900">On Leave</option>
+              <option value="inactive" className="bg-slate-900">Inactive</option>
+              <option value="suspended" className="bg-slate-900">Suspended</option>
             </select>
           </div>
-        </Card>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <p className="text-gray-600 text-sm">Total Employees</p>
-            <p className="text-2xl font-bold text-gray-800 mt-1">{employees.length}</p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">Active</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
-              {employees.filter((e) => e.status === 'active').length}
-            </p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">On Leave</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-1">
-              {employees.filter((e) => e.status === 'on_leave').length}
-            </p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">Departments</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">
-              {new Set(employees.map((e) => e.department)).size}
-            </p>
-          </Card>
         </div>
 
-        {/* Table */}
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Employee List</h3>
-            <Button variant="secondary" size="sm" className="flex items-center gap-2">
+        {/* Stats - Premium Glass Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-cyan-400/50 transition-all group">
+            <p className="text-slate-400 text-sm font-medium">Total Employees</p>
+            <p className="text-3xl font-black text-white mt-2">{employees.length}</p>
+            <div className="absolute top-2 right-2 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+          </div>
+          <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-green-400/50 transition-all group">
+            <p className="text-slate-400 text-sm font-medium">Active</p>
+            <p className="text-3xl font-black text-green-400 mt-2">
+              {employees.filter((e) => e.status === 'active').length}
+            </p>
+          </div>
+          <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-amber-400/50 transition-all group">
+            <p className="text-slate-400 text-sm font-medium">On Leave</p>
+            <p className="text-3xl font-black text-amber-400 mt-2">
+              {employees.filter((e) => e.status === 'on_leave').length}
+            </p>
+          </div>
+          <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-blue-400/50 transition-all group">
+            <p className="text-slate-400 text-sm font-medium">Departments</p>
+            <p className="text-3xl font-black text-blue-400 mt-2">
+              {new Set(employees.map((e) => e.department)).size}
+            </p>
+          </div>
+        </div>
+
+        {/* Table - Premium Glass */}
+        <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-white text-lg">Employee List ({filteredEmployees.length})</h3>
+            <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300 hover:text-purple-200 hover:border-purple-400/50 text-sm font-semibold transition-all">
               <Download size={16} />
               Export
-            </Button>
+            </button>
           </div>
-          <Table
-            columns={columns}
-            data={filteredEmployees}
-            onRowClick={(emp) => {
-              setSelectedEmployee(emp);
-              setShowModal(true);
-            }}
-          />
-        </Card>
+          <div className="overflow-x-auto">
+            <Table
+              columns={columns}
+              data={filteredEmployees}
+              onRowClick={(emp) => {
+                setSelectedEmployee(emp);
+                setShowModal(true);
+              }}
+            />
+          </div>
+        </div>
 
         {/* Employee Detail Modal */}
         <Modal
