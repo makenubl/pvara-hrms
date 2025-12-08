@@ -4,7 +4,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { Button, Input } from '../components/UI';
 import { validateEmail } from '../utils/validation';
-import pvaraLogo from '../pvara-logo.svg';
+import pvaraLogo from '../pvara-logo.png';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -63,11 +63,11 @@ const Login = () => {
       <div className="w-full max-w-md relative z-10">
         {/* Logo Section */}
         <div className="text-center mb-12 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 mb-6 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-xl opacity-30 blur-lg animate-glow"></div>
-            <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-xl p-0.5">
-              <div className="bg-slate-900 rounded-lg p-3">
-                <img src={pvaraLogo} alt="PVARA" className="w-12 h-12" />
+          <div className="inline-flex items-center justify-center w-24 h-24 mb-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl opacity-30 blur-lg animate-glow"></div>
+            <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-2xl p-1 flex items-center justify-center">
+              <div className="bg-slate-900 rounded-xl p-2">
+                <img src={pvaraLogo} alt="PVARA" className="w-16 h-16 object-contain" />
               </div>
             </div>
           </div>

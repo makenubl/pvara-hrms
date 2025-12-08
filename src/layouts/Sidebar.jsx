@@ -18,7 +18,7 @@ import {
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
-import pvaraLogo from '../pvara-logo.svg';
+import pvaraLogo from '../pvara-logo.png';
 
 const Sidebar = () => {
   const { sidebarOpen, toggleSidebar } = useAppStore();
@@ -68,10 +68,10 @@ const Sidebar = () => {
         {/* Logo Header */}
         <div className="p-6 border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
           <Link to="/dashboard" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10">
+            <div className="relative w-12 h-12">
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg opacity-30 group-hover:opacity-50 blur-lg transition-opacity"></div>
               <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-lg p-1 flex items-center justify-center">
-                <img src={pvaraLogo} alt="PVARA" className="w-6 h-6" />
+                <img src={pvaraLogo} alt="PVARA" className="w-9 h-9 object-contain" />
               </div>
             </div>
             <div>
