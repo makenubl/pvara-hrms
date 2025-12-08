@@ -48,11 +48,13 @@ const Settings = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
-          <p className="text-gray-600">Manage your PVARA configuration</p>
+      <div className="space-y-6 pb-6">
+        {/* Header with gradient */}
+        <div className="animate-fade-in">
+          <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Settings
+          </h1>
+          <p className="text-slate-400 mt-2">Manage your PVARA configuration</p>
         </div>
 
         {/* Tabs */}
