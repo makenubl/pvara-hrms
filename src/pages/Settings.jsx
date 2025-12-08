@@ -1,11 +1,28 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Lock, User, Save, Eye, EyeOff } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  Bell,
+  Lock,
+  User,
+  Save,
+  Eye,
+  EyeOff,
+  Plus,
+  Edit2,
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  Users,
+} from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
-import { Card, Button, Badge } from '../components/UI';
+import { Card, Button, Badge, Modal } from '../components/UI';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('account');
   const [showPassword, setShowPassword] = useState(false);
+  const [expandedPositions, setExpandedPositions] = useState(new Set());
+  const [showPositionModal, setShowPositionModal] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: 'John',
     lastName: 'Doe',
@@ -31,6 +48,74 @@ const Settings = () => {
     loginAlerts: true,
   });
 
+  // Mock organizational hierarchy data
+  const [positions] = useState([
+    {
+      id: 1,
+      title: 'CEO',
+      department: 'Executive',
+      level: 'executive',
+      employees: 1,
+      reportsTo: null,
+      children: [
+        {
+          id: 2,
+          title: 'CTO',
+          department: 'Technology',
+          level: 'executive',
+          employees: 1,
+          reportsTo: 1,
+          children: [
+            {
+              id: 5,
+              title: 'Engineering Manager',
+              department: 'Technology',
+              level: 'senior',
+              employees: 5,
+              reportsTo: 2,
+              children: [],
+            },
+          ],
+        },
+        {
+          id: 3,
+          title: 'COO',
+          department: 'Operations',
+          level: 'executive',
+          employees: 1,
+          reportsTo: 1,
+          children: [
+            {
+              id: 6,
+              title: 'HR Manager',
+              department: 'Human Resources',
+              level: 'mid',
+              employees: 3,
+              reportsTo: 3,
+              children: [],
+            },
+          ],
+        },
+        {
+          id: 4,
+          title: 'CFO',
+          department: 'Finance',
+          level: 'executive',
+          employees: 1,
+          reportsTo: 1,
+          children: [],
+        },
+      ],
+    },
+  ]);
+
+  const [newPosition, setNewPosition] = useState({
+    title: '',
+    department: '',
+    reportsTo: null,
+    level: 'mid',
+  });
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -39,6 +124,58 @@ const Settings = () => {
   const handleNotificationChange = (key) => {
     setNotificationSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const handlePositionChange = (e) => {
+    const { name, value } = e.target;
+    setNewPosition((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const toggleExpanded = (id) => {
+    const newExpanded = new Set(expandedPositions);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedPositions(newExpanded);
+  };
+
+  const renderPositionTree = (pos, level = 0) => (
+    <div key={pos.id} className="ml-4">
+      <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-lg mb-2 hover:bg-white/10 transition-all">
+        {pos.children && pos.children.length > 0 && (
+          <button onClick={() => toggleExpanded(pos.id)} className="text-cyan-400">
+            {expandedPositions.has(pos.id) ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+          </button>
+        )}
+        {(!pos.children || pos.children.length === 0) && <div className="w-6" />}
+
+        <div className="flex-1">
+          <p className="font-semibold text-white">{pos.title}</p>
+          <p className="text-xs text-slate-400">{pos.department}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge variant="blue">{pos.level}</Badge>
+            <span className="text-xs text-slate-300 flex items-center gap-1">
+              <Users size={12} /> {pos.employees} employee{pos.employees !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button className="p-2 hover:bg-cyan-500/20 rounded-lg transition-all">
+            <Edit2 size={16} className="text-cyan-400" />
+          </button>
+          <button className="p-2 hover:bg-red-500/20 rounded-lg transition-all">
+            <Trash2 size={16} className="text-red-400" />
+          </button>
+        </div>
+      </div>
+
+      {expandedPositions.has(pos.id) && pos.children && pos.children.length > 0 && (
+        <div>{pos.children.map((child) => renderPositionTree(child, level + 1))}</div>
+      )}
+    </div>
+  );
 
   return (
     <MainLayout>
@@ -55,7 +192,7 @@ const Settings = () => {
 
         {/* Tabs */}
         <div className="flex gap-2 border-b border-white/10 overflow-x-auto">
-          {['account', 'notifications', 'security'].map((tab) => (
+          {['account', 'notifications', 'security', 'hierarchy'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -63,7 +200,7 @@ const Settings = () => {
                 activeTab === tab ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-400'
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === 'hierarchy' ? 'Organization' : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
@@ -266,7 +403,110 @@ const Settings = () => {
             </Card>
           </div>
         )}
+
+        {/* Organization Hierarchy */}
+        {activeTab === 'hierarchy' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">Organization Structure</h2>
+              <Button onClick={() => setShowPositionModal(true)} className="flex items-center gap-2">
+                <Plus size={18} />
+                Add Position
+              </Button>
+            </div>
+
+            <Card>
+              <h3 className="font-semibold text-white mb-4">Reporting Structure</h3>
+              <div className="space-y-4">
+                {positions.map((pos) => renderPositionTree(pos))}
+              </div>
+            </Card>
+
+            {/* Position Distribution */}
+            <Card>
+              <h3 className="font-semibold text-white mb-4">Position Summary</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <p className="text-slate-300 text-sm">Total Positions</p>
+                  <p className="text-2xl font-black text-cyan-400 mt-2">12</p>
+                </div>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <p className="text-slate-300 text-sm">Filled</p>
+                  <p className="text-2xl font-black text-emerald-400 mt-2">10</p>
+                </div>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <p className="text-slate-300 text-sm">Open</p>
+                  <p className="text-2xl font-black text-amber-400 mt-2">2</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
+
+      {/* Position Modal */}
+      <Modal isOpen={showPositionModal} title="Add/Edit Position" onClose={() => setShowPositionModal(false)}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Position Title</label>
+            <input
+              type="text"
+              name="title"
+              value={newPosition.title}
+              onChange={handlePositionChange}
+              placeholder="e.g., Senior Developer"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Department</label>
+            <input
+              type="text"
+              name="department"
+              value={newPosition.department}
+              onChange={handlePositionChange}
+              placeholder="e.g., Engineering"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Level</label>
+            <select
+              name="level"
+              value={newPosition.level}
+              onChange={handlePositionChange}
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            >
+              <option value="junior">Junior</option>
+              <option value="mid">Mid-Level</option>
+              <option value="senior">Senior</option>
+              <option value="executive">Executive</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Reports To</label>
+            <select
+              name="reportsTo"
+              value={newPosition.reportsTo || ''}
+              onChange={handlePositionChange}
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            >
+              <option value="">Select a position</option>
+              {positions.map((pos) => (
+                <option key={pos.id} value={pos.id}>
+                  {pos.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex gap-2 pt-4">
+            <Button className="flex-1">Save Position</Button>
+            <Button variant="secondary" className="flex-1" onClick={() => setShowPositionModal(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </MainLayout>
   );
 };
