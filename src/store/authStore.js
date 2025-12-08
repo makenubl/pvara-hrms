@@ -11,7 +11,7 @@ export const useAuthStore = create(
       role: null,
       permissions: [],
 
-      login: async (email, password) => {
+      login: async (email) => {
         set({ isLoading: true, error: null });
         try {
           // Mock login - replace with actual API call

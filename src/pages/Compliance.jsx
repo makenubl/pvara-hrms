@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Shield, FileCheck, AlertCircle, Plus, Download } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Shield, CheckCircle, AlertCircle, Clock, Plus, Download } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
-import { handleDownloadReport } from '../utils/handlers';
 import { Card, Button, Badge, Table } from '../components/UI';
-import { DOCUMENT_STATUS } from '../utils/constants';
 
 const Compliance = () => {
   const [activeTab, setActiveTab] = useState('policies');
@@ -12,83 +9,147 @@ const Compliance = () => {
   const [policies] = useState([
     {
       id: 1,
-      name: 'Code of Conduct',
+      name: 'Data Privacy Policy',
+      category: 'Data Protection',
       version: '2.0',
-      lastUpdated: '2025-11-15',
+      lastUpdated: '2025-11-20',
       status: 'active',
-      applicableEmployees: 324,
-      acknowledgmentRate: 98,
+      acknowledgments: 87,
     },
     {
       id: 2,
-      name: 'Data Privacy & Security',
+      name: 'Code of Conduct',
+      category: 'Ethics',
       version: '1.5',
-      lastUpdated: '2025-10-01',
+      lastUpdated: '2025-10-15',
       status: 'active',
-      applicableEmployees: 324,
-      acknowledgmentRate: 95,
+      acknowledgments: 92,
     },
     {
       id: 3,
-      name: 'Anti-Harassment Policy',
-      version: '1.0',
-      lastUpdated: '2025-09-20',
-      status: 'active',
-      applicableEmployees: 324,
-      acknowledgmentRate: 100,
+      name: 'Health & Safety Guidelines',
+      category: 'Safety',
+      version: '3.0',
+      lastUpdated: '2025-09-01',
+      status: 'under-review',
+      acknowledgments: 45,
     },
   ]);
 
-  const [documents] = useState([
+  const [audits] = useState([
     {
       id: 1,
-      employeeId: 'EMP001',
-      name: 'John Doe',
-      documentType: 'Identity Verification',
-      issueDate: '2020-01-15',
-      expiryDate: '2030-01-14',
-      status: 'verified',
+      title: 'Annual Compliance Audit',
+      department: 'Finance',
+      date: '2025-11-25',
+      status: 'completed',
+      findings: 3,
     },
     {
       id: 2,
-      employeeId: 'EMP002',
-      name: 'Jane Smith',
-      documentType: 'Professional License',
-      issueDate: '2022-06-01',
-      expiryDate: '2026-05-31',
-      status: 'verified',
+      title: 'Data Privacy Audit',
+      department: 'IT',
+      date: '2025-12-10',
+      status: 'in-progress',
+      findings: 1,
+    },
+    {
+      id: 3,
+      title: 'HR Compliance Review',
+      department: 'HR',
+      date: '2025-12-15',
+      status: 'pending',
+      findings: 0,
     },
   ]);
 
-  const [auditLogs] = useState([
+  const policyColumns = [
     {
-      id: 1,
-      action: 'Policy Updated',
-      object: 'Code of Conduct',
-      performedBy: 'Sarah Williams',
-      timestamp: '2025-12-08 10:30 AM',
-      details: 'Updated section 3.2',
+      key: 'name',
+      label: 'Policy Name',
+      render: (value, row) => (
+        <div>
+          <p className="font-semibold text-white">{value}</p>
+          <p className="text-xs text-slate-400">{row.category}</p>
+        </div>
+      ),
     },
     {
-      id: 2,
-      action: 'Document Verified',
-      object: 'John Doe - Passport',
-      performedBy: 'HR Admin',
-      timestamp: '2025-12-07 02:15 PM',
-      details: 'Verified for employment',
+      key: 'version',
+      label: 'Version',
+      render: (value) => <span className="text-slate-200">{value}</span>,
     },
-  ]);
+    {
+      key: 'lastUpdated',
+      label: 'Last Updated',
+      render: (value) => <span className="text-slate-300">{value}</span>,
+    },
+    {
+      key: 'acknowledgments',
+      label: 'Acknowledgments',
+      render: (value) => <span className="text-white font-bold">{value}%</span>,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value) => <Badge variant={value === 'active' ? 'green' : 'yellow'}>{value}</Badge>,
+    },
+  ];
+
+  const auditColumns = [
+    {
+      key: 'title',
+      label: 'Audit Name',
+      render: (value) => <span className="font-semibold text-white">{value}</span>,
+    },
+    {
+      key: 'department',
+      label: 'Department',
+      render: (value) => <span className="text-slate-200">{value}</span>,
+    },
+    {
+      key: 'date',
+      label: 'Date',
+      render: (value) => <span className="text-slate-300">{value}</span>,
+    },
+    {
+      key: 'findings',
+      label: 'Findings',
+      render: (value) => (
+        <span className={value > 0 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>
+          {value}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value) => (
+        <Badge
+          variant={
+            value === 'completed'
+              ? 'green'
+              : value === 'in-progress'
+              ? 'blue'
+              : 'gray'
+          }
+        >
+          {value}
+        </Badge>
+      ),
+    },
+  ];
 
   return (
     <MainLayout>
-      <div className="space-y-6 pb-6">
-        {/* Header with gradient */}
+      <div className="space-y-6 pb-6 text-slate-100">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Compliance & Documentation
+              Compliance
             </h1>
-            <p className="text-slate-400 mt-2">Manage policies, documents, and compliance</p>
+            <p className="text-slate-400 mt-2">Manage policies, audits, and compliance tracking</p>
           </div>
           <Button className="flex items-center gap-2">
             <Plus size={20} />
@@ -97,115 +158,100 @@ const Compliance = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
-            <p className="text-gray-600 text-sm">Active Policies</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">12</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Active Policies</p>
+                <p className="text-2xl font-black text-white mt-1">
+                  {policies.filter((p) => p.status === 'active').length}
+                </p>
+              </div>
+              <Shield className="w-8 h-8 text-cyan-400" />
+            </div>
           </Card>
           <Card>
-            <p className="text-gray-600 text-sm">Verified Documents</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">324</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Completed Audits</p>
+                <p className="text-2xl font-black text-emerald-300 mt-1">
+                  {audits.filter((a) => a.status === 'completed').length}
+                </p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-emerald-400" />
+            </div>
           </Card>
           <Card>
-            <p className="text-gray-600 text-sm">Pending Review</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-1">8</p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">Compliance Rate</p>
-            <p className="text-2xl font-bold text-purple-600 mt-1">98%</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Pending Audits</p>
+                <p className="text-2xl font-black text-amber-300 mt-1">
+                  {audits.filter((a) => a.status === 'pending').length}
+                </p>
+              </div>
+              <AlertCircle className="w-8 h-8 text-amber-400" />
+            </div>
           </Card>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-gray-200">
-          {[
-            { id: 'policies', label: 'Policies' },
-            { id: 'documents', label: 'Documents' },
-            { id: 'audit', label: 'Audit Trail' },
-          ].map((tab) => (
+        <div className="flex gap-2 border-b border-white/10">
+          {['policies', 'audits'].map((tab) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-3 font-medium text-sm transition-all ${
+                activeTab === tab ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-400'
               }`}
             >
-              {tab.label}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Content */}
+        {/* Policies Tab */}
         {activeTab === 'policies' && (
-          <div className="space-y-4">
-            {policies.map((policy) => (
-              <Card key={policy.id}>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-800">{policy.name}</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm text-gray-600">
-                      <div>Version: {policy.version}</div>
-                      <div>Updated: {policy.lastUpdated}</div>
-                      <div>Employees: {policy.applicableEmployees}</div>
-                      <div>Acknowledged: {policy.acknowledgmentRate}%</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant="green">Active</Badge>
-                    <Button size="sm" variant="secondary" className="flex items-center gap-1">
-                      <Download size={14} />
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              </Card>
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white">Compliance Policies</h3>
+              <Download size={18} className="text-slate-400" />
+            </div>
+            <Table columns={policyColumns} data={policies} />
+          </Card>
+        )}
+
+        {/* Audits Tab */}
+        {activeTab === 'audits' && (
+          <Card>
+            <h3 className="font-semibold text-white mb-4">Compliance Audits</h3>
+            <Table columns={auditColumns} data={audits} />
+          </Card>
+        )}
+
+        {/* Compliance Checklist */}
+        <Card>
+          <h3 className="font-semibold text-white mb-4">Compliance Checklist</h3>
+          <div className="space-y-3">
+            {[
+              { item: 'Anti-Money Laundering Compliance', completed: true },
+              { item: 'Export Control Regulations', completed: true },
+              { item: 'Environmental Compliance', completed: false },
+              { item: 'Data Retention Policy', completed: true },
+              { item: 'Whistleblower Program', completed: false },
+            ].map((check, idx) => (
+              <div key={idx} className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-lg">
+                <input
+                  type="checkbox"
+                  checked={check.completed}
+                  onChange={() => {}}
+                  className="w-4 h-4 rounded border-white/20 accent-cyan-400"
+                />
+                <span className="text-slate-200">{check.item}</span>
+                {check.completed && <CheckCircle size={16} className="ml-auto text-emerald-400" />}
+              </div>
             ))}
           </div>
-        )}
-
-        {activeTab === 'documents' && (
-          <Card>
-            <h3 className="font-semibold text-gray-800 mb-4">Employee Documents</h3>
-            <div className="space-y-3">
-              {documents.map((doc) => (
-                <div key={doc.id} className="p-3 border border-gray-200 rounded-lg flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-800">{doc.name}</p>
-                    <p className="text-sm text-gray-600">{doc.documentType}</p>
-                    <p className="text-xs text-gray-500">
-                      Expires: {doc.expiryDate}
-                    </p>
-                  </div>
-                  <Badge variant="green">{doc.status}</Badge>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
-
-        {activeTab === 'audit' && (
-          <Card>
-            <h3 className="font-semibold text-gray-800 mb-4">Audit Trail</h3>
-            <div className="space-y-3">
-              {auditLogs.map((log) => (
-                <div key={log.id} className="p-3 border border-gray-200 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="font-medium text-gray-800">{log.action}</p>
-                      <p className="text-sm text-gray-600">{log.object}</p>
-                    </div>
-                    <span className="text-xs text-gray-500">{log.timestamp}</span>
-                  </div>
-                  <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
-                    By: {log.performedBy} • {log.details}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+        </Card>
       </div>
     </MainLayout>
   );

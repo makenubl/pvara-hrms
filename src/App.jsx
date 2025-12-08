@@ -41,7 +41,6 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
-  const { token } = useAuthStore();
   const { applyTheme, currentCompany } = useCompanyStore();
 
   // Apply theme on mount and when company changes

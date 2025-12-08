@@ -8,17 +8,12 @@ import { Card, Button, Badge, Modal } from '../components/UI';
 
 const SubscriptionManagement = () => {
   const navigate = useNavigate();
-  const { subscription, setSubscription, isSubscriptionActive, getSubscriptionInfo } = useCompanyStore();
+  const { subscription, setSubscription, getSubscriptionInfo } = useCompanyStore();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedPlan] = useState(null);
 
   const currentPlan = subscription ? SUBSCRIPTION_PLANS[subscription.planId] : null;
   const subscriptionInfo = getSubscriptionInfo();
-
-  const handleUpgrade = (plan) => {
-    setSelectedPlan(plan);
-    setShowUpgradeModal(true);
-  };
 
   const confirmUpgrade = () => {
     if (!selectedPlan) return;

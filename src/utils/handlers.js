@@ -32,11 +32,11 @@ export const handleDownloadReport = (reportName) => {
   }, 1500);
 };
 
-export const handleApprove = (type, item) => {
+export const handleApprove = (type) => {
   toast.success(`${type} approved successfully!`);
 };
 
-export const handleReject = (type, item) => {
+export const handleReject = (type) => {
   toast.error(`${type} rejected!`);
 };
 
@@ -44,15 +44,15 @@ export const handleEnroll = (programName) => {
   toast.success(`Enrolled in ${programName} successfully!`);
 };
 
-export const handleViewDetails = (item) => {
+export const handleViewDetails = () => {
   toast('View details feature - Opening modal...');
 };
 
-export const handleEdit = (item) => {
+export const handleEdit = () => {
   toast('Edit feature - Opening edit form...');
 };
 
-export const handleDelete = (item) => {
+export const handleDelete = () => {
   toast.error('Delete confirmation required');
 };
 

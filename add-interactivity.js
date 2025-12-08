@@ -1,5 +1,7 @@
 // This script adds toast import to pages that need it
+// eslint-disable-next-line no-undef
 const fs = require('fs');
+// eslint-disable-next-line no-undef
 const path = require('path');
 
 const pagesDir = '/Users/ubl/pvara-hrms/src/pages';

@@ -1,97 +1,44 @@
 import React, { useState } from 'react';
 import { Star, Target, TrendingUp, Plus, Filter } from 'lucide-react';
-import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
-import { Card, Button, Badge, Table, Modal, Input, Stat } from '../components/UI';
+import { Card, Button, Badge, Table, Input, Stat } from '../components/UI';
 import { PERFORMANCE_RATING, APPRAISAL_STATUS } from '../utils/constants';
 
 const PerformanceManagement = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [activeTab, setActiveTab] = useState('appraisals'); // appraisals, goals, feedback
+  const [activeTab, setActiveTab] = useState('appraisals');
 
   const [appraisals] = useState([
     {
       id: 1,
       employeeId: 'EMP001',
       name: 'John Doe',
-      period: '2025 Q4',
+      rating: 4.5,
       status: 'completed',
-      rating: 4,
-      ratedBy: 'Sarah Williams',
-      ratedDate: '2025-12-05',
+      evaluator: 'Sarah Williams',
+      completedDate: '2025-12-05',
+      comment: 'Excellent performance, strong leadership',
     },
     {
       id: 2,
       employeeId: 'EMP002',
       name: 'Jane Smith',
-      period: '2025 Q4',
+      rating: 4.2,
       status: 'completed',
-      rating: 5,
-      ratedBy: 'Sarah Williams',
-      ratedDate: '2025-12-03',
+      evaluator: 'Michael Brown',
+      completedDate: '2025-12-04',
+      comment: 'Good work on the recent project',
     },
     {
       id: 3,
       employeeId: 'EMP003',
       name: 'Bob Johnson',
-      period: '2025 Q4',
+      rating: 3.8,
       status: 'pending',
-      rating: null,
-      ratedBy: 'Sarah Williams',
-      ratedDate: null,
+      evaluator: 'Sarah Williams',
+      completedDate: null,
+      comment: '',
     },
   ]);
-
-  const [goals] = useState([
-    {
-      id: 1,
-      employeeId: 'EMP001',
-      name: 'John Doe',
-      goal: 'Complete AWS certification',
-      target: '2026-03-31',
-      progress: 75,
-      status: 'in_progress',
-    },
-    {
-      id: 2,
-      employeeId: 'EMP002',
-      name: 'Jane Smith',
-      goal: 'Improve team retention by 15%',
-      target: '2026-06-30',
-      progress: 40,
-      status: 'in_progress',
-    },
-  ]);
-
-  const [feedbacks] = useState([
-    {
-      id: 1,
-      employeeId: 'EMP001',
-      name: 'John Doe',
-      givenBy: 'Michael Brown',
-      feedback: 'Excellent technical skills and collaborative approach',
-      rating: 4.5,
-      type: '360_feedback',
-    },
-    {
-      id: 2,
-      employeeId: 'EMP001',
-      name: 'John Doe',
-      givenBy: 'Sarah Williams',
-      feedback: 'Strong leadership qualities and mentoring abilities',
-      rating: 4,
-      type: '360_feedback',
-    },
-  ]);
-
-  const ratingColors = {
-    5: 'bg-green-100 text-green-800',
-    4: 'bg-blue-100 text-blue-800',
-    3: 'bg-yellow-100 text-yellow-800',
-    2: 'bg-orange-100 text-orange-800',
-    1: 'bg-red-100 text-red-800',
-  };
 
   const appraisalColumns = [
     {
@@ -99,42 +46,43 @@ const PerformanceManagement = () => {
       label: 'Employee',
       render: (value, row) => (
         <div>
-          <p className="font-medium text-gray-800">{value}</p>
-          <p className="text-xs text-gray-500">{row.employeeId}</p>
+          <p className="font-semibold text-white">{value}</p>
+          <p className="text-xs text-slate-400">{row.employeeId}</p>
         </div>
       ),
     },
     {
-      key: 'period',
-      label: 'Period',
-    },
-    {
       key: 'rating',
       label: 'Rating',
-      render: (value) =>
-        value ? (
-          <div className="flex items-center gap-1">
-            {[...Array(value)].map((_, i) => (
-              <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
-            ))}
-          </div>
-        ) : (
-          <span className="text-gray-500">Pending</span>
-        ),
+      render: (value) => (
+        <div className="flex items-center gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              size={16}
+              className={i < Math.floor(value) ? 'fill-amber-300 text-amber-300' : 'text-slate-400'}
+            />
+          ))}
+          <span className="text-white font-semibold ml-2">{value}</span>
+        </div>
+      ),
     },
     {
       key: 'status',
       label: 'Status',
-      render: (value) => (
-        <Badge variant={value === 'completed' ? 'green' : 'yellow'}>{value}</Badge>
-      ),
+      render: (value) => <Badge variant={value === 'completed' ? 'green' : 'yellow'}>{value}</Badge>,
+    },
+    {
+      key: 'evaluator',
+      label: 'Evaluator',
+      render: (value) => <span className="text-slate-200">{value}</span>,
     },
   ];
 
   return (
     <MainLayout>
-      <div className="space-y-6 pb-6">
-        {/* Header with gradient */}
+      <div className="space-y-6 pb-6 text-slate-100">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -149,103 +97,80 @@ const PerformanceManagement = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Stat
-            icon={TrendingUp}
-            label="Avg Rating"
-            value="4.2/5"
-            trend="↑ 0.3 this quarter"
-            trendUp={true}
-          />
-          <Stat
-            icon={Star}
-            label="Completed"
-            value="156"
-            trend="89% completion"
-            trendUp={true}
-          />
-          <Stat
-            icon={Target}
-            label="Active Goals"
-            value="324"
-            trend="75% on track"
-            trendUp={true}
-          />
-          <Stat
-            label="360 Feedbacks"
-            value="92"
-            trend="This quarter"
-            trendUp={true}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Avg Rating</p>
+                <p className="text-2xl font-black text-amber-300 mt-1">
+                  {(appraisals.reduce((sum, a) => sum + a.rating, 0) / appraisals.length).toFixed(1)}
+                </p>
+              </div>
+              <Star className="w-8 h-8 text-amber-400" />
+            </div>
+          </Card>
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Completed</p>
+                <p className="text-2xl font-black text-emerald-300 mt-1">
+                  {appraisals.filter((a) => a.status === 'completed').length}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-emerald-400" />
+            </div>
+          </Card>
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Pending</p>
+                <p className="text-2xl font-black text-amber-300 mt-1">
+                  {appraisals.filter((a) => a.status === 'pending').length}
+                </p>
+              </div>
+              <Target className="w-8 h-8 text-amber-400" />
+            </div>
+          </Card>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-gray-200">
-          {[
-            { id: 'appraisals', label: 'Appraisals' },
-            { id: 'goals', label: 'Goals & OKRs' },
-            { id: 'feedback', label: '360 Feedback' },
-          ].map((tab) => (
+        <div className="flex gap-2 border-b border-white/10">
+          {['appraisals', 'goals', 'feedback'].map((tab) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-3 font-medium text-sm transition-all ${
+                activeTab === tab
+                  ? 'text-cyan-400 border-b-2 border-cyan-400'
+                  : 'text-slate-400 hover:text-slate-300'
               }`}
             >
-              {tab.label}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Content */}
+        {/* Appraisals Table */}
         {activeTab === 'appraisals' && (
           <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-800">Performance Appraisals</h3>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
+            <h3 className="font-semibold text-white mb-4">Appraisals</h3>
             <Table columns={appraisalColumns} data={appraisals} />
           </Card>
         )}
 
+        {/* Goals Section */}
         {activeTab === 'goals' && (
           <Card>
-            <h3 className="font-semibold text-gray-800 mb-4">Goals & OKRs</h3>
-            <div className="space-y-4">
-              {goals.map((goal) => (
-                <div key={goal.id} className="p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
+            <h3 className="font-semibold text-white mb-4">Performance Goals</h3>
+            <div className="space-y-3">
+              {appraisals.map((emp) => (
+                <div key={emp.id} className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-gray-800">{goal.name}</p>
-                      <p className="text-sm text-gray-600">{goal.goal}</p>
+                      <p className="font-medium text-white">{emp.name}</p>
+                      <p className="text-sm text-slate-300 mt-1">Q4 2025 Performance Goals</p>
                     </div>
-                    <Badge variant={goal.status === 'in_progress' ? 'blue' : 'green'}>
-                      {goal.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-gray-600">Progress</span>
-                      <span className="text-sm font-semibold text-gray-800">{goal.progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${goal.progress}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">Target: {goal.target}</p>
+                    <Badge variant="blue">Active</Badge>
                   </div>
                 </div>
               ))}
@@ -253,35 +178,15 @@ const PerformanceManagement = () => {
           </Card>
         )}
 
+        {/* Feedback Section */}
         {activeTab === 'feedback' && (
           <Card>
-            <h3 className="font-semibold text-gray-800 mb-4">360-Degree Feedback</h3>
-            <div className="space-y-4">
-              {feedbacks.map((fb) => (
-                <div key={fb.id} className="p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="font-medium text-gray-800">{fb.name}</p>
-                      <p className="text-sm text-gray-600">From: {fb.givenBy}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-yellow-600">{fb.rating}/5</p>
-                      <div className="flex gap-1 justify-end mt-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={12}
-                            className={
-                              i < Math.round(fb.rating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                            }
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-700 bg-blue-50 p-3 rounded">{fb.feedback}</p>
+            <h3 className="font-semibold text-white mb-4">360 Feedback</h3>
+            <div className="space-y-3">
+              {appraisals.slice(0, 2).map((emp) => (
+                <div key={emp.id} className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <p className="font-medium text-white">{emp.name}</p>
+                  <p className="text-sm text-slate-300 mt-2">{emp.comment || 'Feedback pending...'}</p>
                 </div>
               ))}
             </div>

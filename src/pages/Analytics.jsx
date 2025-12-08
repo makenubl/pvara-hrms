@@ -1,198 +1,161 @@
 import React, { useState } from 'react';
-import { BarChart3, TrendingUp, Users, Calendar, Download } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { BarChart3, TrendingUp, Users, Calendar, Download, Filter } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
-import { handleDownloadReport } from '../utils/handlers';
-import { Card, Button } from '../components/UI';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Card, Button, Badge } from '../components/UI';
 
 const Analytics = () => {
-  const [dateRange, setDateRange] = useState('this-quarter');
+  const [dateRange, setDateRange] = useState('month');
 
-  // Mock analytics data
-  const employeeGrowth = [
-    { month: 'Jan', total: 280 },
-    { month: 'Feb', total: 290 },
-    { month: 'Mar', total: 300 },
-    { month: 'Apr', total: 310 },
-    { month: 'May', total: 315 },
-    { month: 'Jun', total: 324 },
+  const metrics = [
+    { label: 'Total Employees', value: 1240, change: '+12%', icon: Users, color: 'cyan' },
+    { label: 'Avg Engagement Score', value: '8.2/10', change: '+2.1%', icon: TrendingUp, color: 'blue' },
+    { label: 'Attrition Rate', value: '3.2%', change: '-0.8%', icon: BarChart3, color: 'amber' },
+    { label: 'Active Projects', value: 45, change: '+5', icon: Calendar, color: 'emerald' },
   ];
 
-  const departmentDistribution = [
-    { name: 'Technology', value: 95, color: '#3b82f6' },
-    { name: 'Finance', value: 48, color: '#10b981' },
-    { name: 'HR', value: 32, color: '#f59e0b' },
-    { name: 'Marketing', value: 68, color: '#8b5cf6' },
-    { name: 'Operations', value: 52, color: '#ef4444' },
-    { name: 'Sales', value: 29, color: '#06b6d4' },
-  ];
-
-  const turnoverData = [
-    { quarter: 'Q1', joinings: 8, separations: 2 },
-    { quarter: 'Q2', joinings: 12, separations: 3 },
-    { quarter: 'Q3', joinings: 10, separations: 1 },
-    { quarter: 'Q4', joinings: 15, separations: 2 },
-  ];
-
-  const performanceDistribution = [
-    { rating: 'Excellent (5)', count: 78 },
-    { rating: 'Very Good (4)', count: 128 },
-    { rating: 'Good (3)', count: 95 },
-    { rating: 'Satisfactory (2)', count: 18 },
-    { rating: 'Needs Improvement (1)', count: 5 },
+  const departmentData = [
+    { dept: 'Engineering', employees: 320, engagement: 8.5, attrition: 2.1 },
+    { dept: 'Sales', employees: 280, engagement: 7.8, attrition: 4.2 },
+    { dept: 'HR', employees: 45, engagement: 8.9, attrition: 1.1 },
+    { dept: 'Finance', employees: 65, engagement: 8.3, attrition: 2.8 },
+    { dept: 'Marketing', employees: 85, engagement: 8.1, attrition: 3.5 },
   ];
 
   return (
     <MainLayout>
-      <div className="space-y-6 pb-6">
-        {/* Header with gradient */}
+      <div className="space-y-6 pb-6 text-slate-100">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Analytics & Reports
+              Analytics
             </h1>
-            <p className="text-slate-400 mt-2">View insights and generate reports</p>
+            <p className="text-slate-400 mt-2">HR metrics, insights, and trends</p>
           </div>
-          <div className="flex gap-2">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="this-month">This Month</option>
-              <option value="this-quarter">This Quarter</option>
-              <option value="this-year">This Year</option>
-            </select>
-            <Button size="sm" className="flex items-center gap-2">
-              <Download size={16} />
-              Export Report
-            </Button>
-          </div>
+          <Button className="flex items-center gap-2">
+            <Download size={20} />
+            Export Report
+          </Button>
         </div>
+
+        {/* Date Range Filter */}
+        <Card>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Filter size={18} className="text-slate-400" />
+            {['week', 'month', 'quarter', 'year'].map((range) => (
+              <button
+                key={range}
+                onClick={() => setDateRange(range)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  dateRange === range
+                    ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/50'
+                    : 'bg-white/5 text-slate-400 border border-white/10'
+                }`}
+              >
+                {range.charAt(0).toUpperCase() + range.slice(1)}
+              </button>
+            ))}
+          </div>
+        </Card>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <p className="text-gray-600 text-sm">Total Headcount</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">324</p>
-            <p className="text-xs text-green-600 mt-2">↑ 3 this month</p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">Avg Tenure</p>
-            <p className="text-2xl font-bold text-purple-600 mt-1">4.2 yrs</p>
-            <p className="text-xs text-gray-600 mt-2">Stable</p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">Turnover Rate</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-1">3.8%</p>
-            <p className="text-xs text-green-600 mt-2">↓ Below industry</p>
-          </Card>
-          <Card>
-            <p className="text-gray-600 text-sm">Avg Performance</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">4.1/5</p>
-            <p className="text-xs text-green-600 mt-2">↑ 0.2 this quarter</p>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {metrics.map((metric, idx) => {
+            const IconComponent = metric.icon;
+            return (
+              <Card key={idx}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-slate-300 text-sm">{metric.label}</p>
+                    <p className="text-2xl font-black text-white mt-2">{metric.value}</p>
+                    <p className="text-xs text-emerald-400 mt-2">{metric.change} vs last {dateRange}</p>
+                  </div>
+                  <IconComponent className={`w-8 h-8 text-${metric.color}-400`} />
+                </div>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Employee Growth */}
-          <Card>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Employee Growth Trend</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={employeeGrowth}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
+        {/* Department Performance */}
+        <Card>
+          <h3 className="font-semibold text-white mb-4">Department Performance</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-300">Department</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-300">Employees</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-300">Engagement</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-300">Attrition</th>
+                </tr>
+              </thead>
+              <tbody>
+                {departmentData.map((dept, idx) => (
+                  <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="px-4 py-3 text-slate-200 font-medium">{dept.dept}</td>
+                    <td className="text-right px-4 py-3 text-slate-300">{dept.employees}</td>
+                    <td className="text-right px-4 py-3">
+                      <span className="text-blue-300 font-semibold">{dept.engagement}</span>
+                    </td>
+                    <td className="text-right px-4 py-3">
+                      <span className="text-amber-300 font-semibold">{dept.attrition}%</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-          {/* Department Distribution */}
+        {/* Trends */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Department Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={departmentDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {departmentDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Turnover & Hiring */}
-          <Card>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Hiring vs Attrition</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={turnoverData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="quarter" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="joinings" fill="#10b981" />
-                <Bar dataKey="separations" fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Performance Distribution */}
-          <Card>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Performance Rating Distribution</h3>
+            <h3 className="font-semibold text-white mb-4">Hiring Trend</h3>
             <div className="space-y-3">
-              {performanceDistribution.map((item, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700">{item.rating}</span>
-                    <span className="text-sm font-bold text-gray-800">{item.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+              {[
+                { month: 'Jan', hires: 12 },
+                { month: 'Feb', hires: 15 },
+                { month: 'Mar', hires: 18 },
+                { month: 'Apr', hires: 14 },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <span className="text-slate-300 text-sm w-8">{item.month}</span>
+                  <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
                     <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${(item.count / 324) * 100}%` }}
-                    ></div>
+                      className="bg-gradient-to-r from-cyan-400 to-blue-400 h-full"
+                      style={{ width: `${(item.hires / 20) * 100}%` }}
+                    />
                   </div>
+                  <span className="text-white font-bold w-8 text-right">{item.hires}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="font-semibold text-white mb-4">Engagement by Level</h3>
+            <div className="space-y-3">
+              {[
+                { level: 'Executive', score: 9.1 },
+                { level: 'Senior', score: 8.5 },
+                { level: 'Mid-Level', score: 8.0 },
+                { level: 'Junior', score: 7.8 },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <span className="text-slate-300 text-sm min-w-max">{item.level}</span>
+                  <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-emerald-400 to-cyan-400 h-full"
+                      style={{ width: `${(item.score / 10) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-white font-bold w-8 text-right">{item.score}</span>
                 </div>
               ))}
             </div>
           </Card>
         </div>
-
-        {/* Reports Section */}
-        <Card>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Available Reports</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { title: 'Employee Directory Report', description: 'Complete employee information' },
-              { title: 'Attendance Summary', description: 'Monthly attendance patterns' },
-              { title: 'Leave Analytics', description: 'Leave utilization and trends' },
-              { title: 'Payroll Report', description: 'Salary and compensation analysis' },
-              { title: 'Performance Review', description: 'Performance metrics and ratings' },
-              { title: 'Recruitment Report', description: 'Hiring funnel and metrics' },
-            ].map((report, index) => (
-              <div key={index} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
-                <p className="font-medium text-gray-800">{report.title}</p>
-                <p className="text-sm text-gray-600 mt-1">{report.description}</p>
-                <Button size="sm" variant="secondary" className="mt-3 w-full" onClick={() => handleDownloadReport(report.name)}>Download</Button>
-              </div>
-            ))}
-          </div>
-        </Card>
       </div>
     </MainLayout>
   );

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Filter, Download, Edit2, Eye, Trash2, UserPlus } from 'lucide-react';
-import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
-import { handleAddEmployee, handleExportData, handleViewDetails } from '../utils/handlers';
+import { handleAddEmployee } from '../utils/handlers';
 import { Card, Button, Badge, Table, Input, Modal } from '../components/UI';
 import { EMPLOYEE_STATUS, DEPARTMENTS } from '../utils/constants';
 
@@ -129,7 +128,7 @@ const Employees = () => {
     {
       key: 'id',
       label: 'Actions',
-      render: (value, row) => (
+      render: () => (
         <div className="flex gap-2">
           <button className="p-2 hover:bg-blue-500/20 hover:border-blue-400/50 border border-transparent rounded-lg transition-all" title="View">
             <Eye size={16} className="text-blue-400" />

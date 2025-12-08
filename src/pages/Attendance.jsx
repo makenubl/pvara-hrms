@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, CheckCircle, XCircle, AlertCircle, Plus } from 'lucide-react';
-import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
-import { handleCheckIn, handleCheckOut, handleMarkAttendance } from '../utils/handlers';
-import { Card, Button, Badge, Table, Input } from '../components/UI';
-import { ATTENDANCE_STATUS } from '../utils/constants';
+import { Card, Button, Badge, Table } from '../components/UI';
 import { getMonthlyCalendar, formatDate } from '../utils/dateUtils';
 
 const Attendance = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [viewMode, setViewMode] = useState('calendar'); // calendar, list
-  const [filterDept, setFilterDept] = useState('');
+  const [viewMode, setViewMode] = useState('list');
+  const [selectedMonth] = useState(new Date());
 
-  // Mock attendance data
   const [attendanceRecords] = useState([
     {
       id: 1,
@@ -68,11 +62,11 @@ const Attendance = () => {
   ]);
 
   const statusIcons = {
-    present: <CheckCircle className="w-5 h-5 text-green-600" />,
-    absent: <XCircle className="w-5 h-5 text-red-600" />,
-    late: <AlertCircle className="w-5 h-5 text-yellow-600" />,
-    half_day: <AlertCircle className="w-5 h-5 text-blue-600" />,
-    work_from_home: <Clock className="w-5 h-5 text-purple-600" />,
+    present: <CheckCircle className="w-5 h-5 text-emerald-300" />,
+    absent: <XCircle className="w-5 h-5 text-rose-300" />,
+    late: <AlertCircle className="w-5 h-5 text-amber-300" />,
+    half_day: <AlertCircle className="w-5 h-5 text-blue-300" />,
+    work_from_home: <Clock className="w-5 h-5 text-purple-300" />,
   };
 
   const statusColors = {
@@ -95,8 +89,8 @@ const Attendance = () => {
       label: 'Employee Name',
       render: (value, row) => (
         <div>
-          <p className="font-medium text-gray-800">{value}</p>
-          <p className="text-xs text-gray-500">{row.employeeId}</p>
+          <p className="font-semibold text-white">{value}</p>
+          <p className="text-xs text-slate-400">{row.employeeId}</p>
         </div>
       ),
     },
@@ -104,7 +98,7 @@ const Attendance = () => {
       key: 'status',
       label: 'Status',
       render: (value) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-white">
           {statusIcons[value]}
           <Badge variant={statusColors[value]}>{value.replace('_', ' ')}</Badge>
         </div>
@@ -113,22 +107,23 @@ const Attendance = () => {
     {
       key: 'checkIn',
       label: 'Check In',
-      render: (value) => <span className="font-medium">{value || '-'}</span>,
+      render: (value) => <span className="font-medium text-white">{value || '-'}</span>,
     },
     {
       key: 'checkOut',
       label: 'Check Out',
-      render: (value) => <span className="font-medium">{value || '-'}</span>,
+      render: (value) => <span className="font-medium text-white">{value || '-'}</span>,
     },
     {
       key: 'department',
       label: 'Department',
+      render: (value) => <span className="text-slate-200">{value}</span>,
     },
   ];
 
   return (
     <MainLayout>
-      <div className="space-y-6 pb-6">
+      <div className="space-y-6 pb-6 text-slate-100">
         {/* Header with gradient */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
@@ -146,26 +141,26 @@ const Attendance = () => {
         {/* Today's Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
-            <p className="text-gray-600 text-sm">Total Present</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
+            <p className="text-slate-300 text-sm">Total Present</p>
+            <p className="text-2xl font-black text-white mt-1">
               {attendanceRecords.filter((r) => r.status === 'present').length}
             </p>
           </Card>
           <Card>
-            <p className="text-gray-600 text-sm">Absent</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">
+            <p className="text-slate-300 text-sm">Absent</p>
+            <p className="text-2xl font-black text-white mt-1">
               {attendanceRecords.filter((r) => r.status === 'absent').length}
             </p>
           </Card>
           <Card>
-            <p className="text-gray-600 text-sm">Late</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-1">
+            <p className="text-slate-300 text-sm">Late</p>
+            <p className="text-2xl font-black text-white mt-1">
               {attendanceRecords.filter((r) => r.status === 'late').length}
             </p>
           </Card>
           <Card>
-            <p className="text-gray-600 text-sm">Work From Home</p>
-            <p className="text-2xl font-bold text-purple-600 mt-1">
+            <p className="text-slate-300 text-sm">Work From Home</p>
+            <p className="text-2xl font-black text-white mt-1">
               {attendanceRecords.filter((r) => r.status === 'work_from_home').length}
             </p>
           </Card>
@@ -173,56 +168,48 @@ const Attendance = () => {
 
         {/* View Mode Toggle */}
         <div className="flex gap-2">
-          <button
+          <Button
+            variant={viewMode === 'calendar' ? 'primary' : 'secondary'}
             onClick={() => setViewMode('calendar')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              viewMode === 'calendar'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-            }`}
           >
             Calendar View
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'primary' : 'secondary'}
             onClick={() => setViewMode('list')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-            }`}
           >
             List View
-          </button>
+          </Button>
         </div>
 
         {viewMode === 'list' ? (
           <Card>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-800">Today's Attendance</h3>
-              <p className="text-sm text-gray-600">{formatDate(new Date())}</p>
+              <h3 className="font-semibold text-white">Today's Attendance</h3>
+              <p className="text-sm text-slate-300">{formatDate(new Date())}</p>
             </div>
-            <Table columns={columns} data={attendanceRecords} />
+            <Table columns={columns} data={todayAttendance} />
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Calendar */}
             <Card className="lg:col-span-2">
-              <h3 className="font-semibold text-gray-800 mb-4">
+              <h3 className="font-semibold text-white mb-4">
                 {selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h3>
               <div className="grid grid-cols-7 gap-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                  <div key={day} className="text-center font-bold text-gray-600 text-sm p-2">
+                  <div key={day} className="text-center font-bold text-slate-300 text-sm p-2">
                     {day}
                   </div>
                 ))}
                 {monthDays.map((day) => (
                   <div
                     key={day.toDateString()}
-                    className="aspect-square border border-gray-200 rounded-lg p-2 cursor-pointer hover:bg-blue-50 transition-colors"
+                    className="aspect-square border border-white/20 rounded-lg p-2 cursor-pointer hover:bg-white/10 transition-colors"
                   >
-                    <p className="text-xs font-semibold text-gray-700">{day.getDate()}</p>
-                    <div className="mt-1 text-xs text-gray-500">
+                    <p className="text-xs font-semibold text-white">{day.getDate()}</p>
+                    <div className="mt-1 text-xs text-slate-400">
                       {Math.floor(Math.random() * 80)}%
                     </div>
                   </div>
@@ -232,35 +219,35 @@ const Attendance = () => {
 
             {/* Legends */}
             <Card>
-              <h3 className="font-semibold text-gray-800 mb-4">Legend</h3>
+              <h3 className="font-semibold text-white mb-4">Legend</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-200 rounded"></div>
-                  <span className="text-sm text-gray-700">Present</span>
+                  <div className="w-4 h-4 bg-emerald-300 rounded"></div>
+                  <span className="text-sm text-slate-200">Present</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-red-200 rounded"></div>
-                  <span className="text-sm text-gray-700">Absent</span>
+                  <div className="w-4 h-4 bg-rose-300 rounded"></div>
+                  <span className="text-sm text-slate-200">Absent</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-yellow-200 rounded"></div>
-                  <span className="text-sm text-gray-700">Late</span>
+                  <div className="w-4 h-4 bg-amber-300 rounded"></div>
+                  <span className="text-sm text-slate-200">Late</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-purple-200 rounded"></div>
-                  <span className="text-sm text-gray-700">Work From Home</span>
+                  <div className="w-4 h-4 bg-purple-300 rounded"></div>
+                  <span className="text-sm text-slate-200">Work From Home</span>
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
-                <h4 className="font-semibold text-gray-800">Quick Stats</h4>
+              <div className="mt-6 pt-6 border-t border-white/20 space-y-3">
+                <h4 className="font-semibold text-white">Quick Stats</h4>
                 <div>
-                  <p className="text-sm text-gray-600">Average Attendance</p>
-                  <p className="text-2xl font-bold text-blue-600">94%</p>
+                  <p className="text-sm text-slate-300">Average Attendance</p>
+                  <p className="text-2xl font-bold text-cyan-400">94%</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">This Month</p>
-                  <p className="text-lg font-bold text-gray-800">22/22 days</p>
+                  <p className="text-sm text-slate-300">This Month</p>
+                  <p className="text-lg font-bold text-white">22/22 days</p>
                 </div>
               </div>
             </Card>

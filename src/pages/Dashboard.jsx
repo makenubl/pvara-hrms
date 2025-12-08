@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Users, Calendar, BarChart3, DollarSign, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight, CheckCircle2, Clock } from 'lucide-react';
-import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { handleAddEmployee, handleMarkAttendance, handleProcessPayroll, handleCreateJob } from '../utils/handlers';
 import { Card, Stat, Button, Badge } from '../components/UI';
