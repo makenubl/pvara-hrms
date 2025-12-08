@@ -12,6 +12,7 @@ export const Button = ({
   variant = 'primary',
   size = 'md',
   className = '',
+  as: Component = 'button',
   ...props
 }) => {
   const baseStyles = 'font-medium rounded-lg transition-colors inline-flex items-center gap-2';
@@ -31,12 +32,12 @@ export const Button = ({
   };
 
   return (
-    <button
+    <Component
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {children}
-    </button>
+    </Component>
   );
 };
 

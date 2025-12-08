@@ -252,12 +252,15 @@ const CompanyOnboarding = () => {
                       onChange={handleLogoUpload}
                       className="hidden"
                     />
-                    <label htmlFor="logo-upload">
-                      <Button as="span" variant="secondary" className="cursor-pointer">
-                        <Upload size={16} className="mr-2" />
-                        Upload Logo
-                      </Button>
-                    </label>
+                    <Button
+                      as="label"
+                      htmlFor="logo-upload"
+                      variant="secondary"
+                      className="cursor-pointer"
+                    >
+                      <Upload size={16} className="mr-2" />
+                      Upload Logo
+                    </Button>
                     <p className="text-sm text-gray-500 mt-2">
                       PNG, JPG or SVG (max 5MB). Recommended: 400x400px
                     </p>

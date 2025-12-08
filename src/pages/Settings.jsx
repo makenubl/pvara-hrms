@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Lock, Database, User } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Lock, Database, User, Upload } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Input, Select, Tabs } from '../components/UI';
+import { useCompanyStore } from '../store/companyStore';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const { branding, uploadLogo } = useCompanyStore();
+  const [logoPreview, setLogoPreview] = useState(branding?.logo || null);
   const [settings, setSettings] = useState({
     companyName: 'Tech Corp Inc',
     industry: 'Technology',
@@ -16,6 +19,24 @@ const Settings = () => {
 
   const handleInputChange = (field, value) => {
     setSettings({ ...settings, [field]: value });
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Logo size should be less than 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+        uploadLogo(reader.result);
+        alert('Logo uploaded successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const tabs = [
@@ -40,6 +61,40 @@ const Settings = () => {
         {/* Profile Settings */}
         {activeTab === 'profile' && (
           <div className="space-y-6">
+            <Card>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Company Logo</h3>
+              <div className="flex items-center gap-4">
+                <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain p-2" />
+                  ) : (
+                    <Upload className="w-8 h-8 text-gray-400" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    id="settings-logo-upload"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    as="label"
+                    htmlFor="settings-logo-upload"
+                    variant="secondary"
+                    className="cursor-pointer"
+                  >
+                    <Upload size={16} className="mr-2" />
+                    Upload Logo
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    PNG, JPG or SVG (max 5MB). Recommended: 400x400px
+                  </p>
+                </div>
+              </div>
+            </Card>
+
             <Card>
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Company Information</h3>
               <div className="space-y-4">
