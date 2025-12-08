@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Download, Filter, Plus, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Button, Badge } from '../components/UI';
 import payrollService from '../services/payrollService';
@@ -33,13 +34,19 @@ const Payroll = () => {
   };
 
   const handleGeneratePayroll = async () => {
+    // Validate month and year are selected
+    if (!generateData.month || !generateData.year) {
+      toast.error('Please select month and year');
+      return;
+    }
+
     try {
       await payrollService.generatePayroll(generateData.month, generateData.year, {});
       setShowGenerateModal(false);
       fetchPayrollData();
-      alert('Payroll generated successfully');
+      toast.success('Payroll generated successfully');
     } catch (err) {
-      alert('Failed to generate payroll: ' + err.message);
+      toast.error('Failed to generate payroll: ' + err.message);
     }
   };
 

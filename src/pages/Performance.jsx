@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Target, TrendingUp, Plus, Filter, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Badge, Table, Input, Stat } from '../components/UI';
 import performanceService from '../services/performanceService';
@@ -91,6 +92,16 @@ const PerformanceManagement = () => {
   };
 
   const handleCreateAppraisal = async () => {
+    // Validate required fields
+    if (!formData.employeeId) {
+      toast.error('Please select an employee');
+      return;
+    }
+    if (!formData.rating || formData.rating < 1 || formData.rating > 5) {
+      toast.error('Please provide a rating between 1 and 5');
+      return;
+    }
+
     try {
       await performanceService.createReview({
         ...formData,
@@ -99,9 +110,9 @@ const PerformanceManagement = () => {
       setShowNewAppraisalModal(false);
       setFormData({ employeeId: '', rating: 5, comment: '' });
       fetchPerformanceData();
-      alert('Appraisal created successfully');
+      toast.success('Appraisal created successfully');
     } catch (err) {
-      alert('Failed to create appraisal: ' + err.message);
+      toast.error('Failed to create appraisal: ' + err.message);
     }
   };
 

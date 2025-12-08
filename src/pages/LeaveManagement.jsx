@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Clock, Plus, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Badge, Table, Modal, Input } from '../components/UI';
 import { LEAVE_TYPES } from '../utils/constants';
@@ -165,8 +166,9 @@ const LeaveManagement = () => {
       await approvalService.approve(record._id || record.id);
       await fetchLeaveRecords();
       await fetchPendingApprovals();
+      toast.success('Leave approved successfully');
     } catch (err) {
-      alert('Failed to approve: ' + err.message);
+      toast.error('Failed to approve: ' + err.message);
     }
   };
 
@@ -177,8 +179,9 @@ const LeaveManagement = () => {
         (r._id || r.id) === (record._id || record.id) ? { ...r, status: 'rejected' } : r
       ));
       await fetchPendingApprovals();
+      toast.success('Leave rejected successfully');
     } catch (err) {
-      alert('Failed to reject: ' + err.message);
+      toast.error('Failed to reject: ' + err.message);
     }
   };
 

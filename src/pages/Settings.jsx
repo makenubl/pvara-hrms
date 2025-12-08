@@ -15,6 +15,7 @@ import {
   Users,
   AlertCircle,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Badge, Modal } from '../components/UI';
 import positionService from '../services/positionService';
@@ -130,10 +131,11 @@ const Settings = () => {
   const handleDeletePosition = async (posId) => {
     if (window.confirm('Delete this position?')) {
       try {
-        await positionService.delete(posId);
+        await positionService.deletePosition(posId);
         await fetchPositions();
+        toast.success('Position deleted successfully');
       } catch (err) {
-        alert('Failed to delete position: ' + err.message);
+        toast.error('Failed to delete position: ' + err.message);
       }
     }
   };

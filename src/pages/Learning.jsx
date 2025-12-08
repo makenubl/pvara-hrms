@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Award, Play, Users, Plus, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Button, Badge } from '../components/UI';
 import learningService from '../services/learningService';
@@ -43,14 +44,20 @@ const Learning = () => {
   };
 
   const handleEnroll = async () => {
+    // Validate courseId is selected
+    if (!enrollData.courseId) {
+      toast.error('Please select a course to enroll');
+      return;
+    }
+
     try {
       await learningService.enrollCourse(user?.id, enrollData.courseId);
       setShowEnrollModal(false);
       setEnrollData({ courseId: '' });
       fetchLearningData();
-      alert('Enrolled successfully');
+      toast.success('Enrolled successfully');
     } catch (err) {
-      alert('Failed to enroll: ' + err.message);
+      toast.error('Failed to enroll: ' + err.message);
     }
   };
 

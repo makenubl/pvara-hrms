@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, CheckCircle, XCircle, AlertCircle, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Badge, Table } from '../components/UI';
 import { getMonthlyCalendar, formatDate } from '../utils/dateUtils';
@@ -79,6 +80,12 @@ const Attendance = () => {
   };
 
   const handleMarkAttendance = async () => {
+    // Validate required fields
+    if (!markData.status || !markData.date) {
+      toast.error('Please select status and date');
+      return;
+    }
+
     try {
       await attendanceService.markAttendance({
         ...markData,
@@ -87,9 +94,9 @@ const Attendance = () => {
       setShowMarkModal(false);
       setMarkData({ status: 'present', date: formatDate(new Date(), 'yyyy-MM-dd') });
       fetchAttendanceData();
-      alert('Attendance marked successfully');
+      toast.success('Attendance marked successfully');
     } catch (err) {
-      alert('Failed to mark attendance: ' + err.message);
+      toast.error('Failed to mark attendance: ' + err.message);
     }
   };
 

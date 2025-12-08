@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, MapPin, Users, Clock, Plus, Eye, Heart, AlertCircle, Filter } from 'lucide-react';
+import toast from 'react-hot-toast';
 import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Badge } from '../components/UI';
 import recruitmentService from '../services/recruitmentService';
@@ -59,6 +60,12 @@ const Recruitment = () => {
   };
 
   const handleCreateJob = async () => {
+    // Validate required fields
+    if (!jobFormData.title || !jobFormData.department || !jobFormData.location) {
+      toast.error('Please fill in title, department, and location');
+      return;
+    }
+
     try {
       await recruitmentService.createJobListing({
         ...jobFormData,
@@ -67,9 +74,9 @@ const Recruitment = () => {
       setShowNewJobModal(false);
       setJobFormData({ title: '', department: '', location: '', description: '' });
       fetchRecruitmentData();
-      alert('Job listing created successfully');
+      toast.success('Job listing created successfully');
     } catch (err) {
-      alert('Failed to create job: ' + err.message);
+      toast.error('Failed to create job: ' + err.message);
     }
   };
 
