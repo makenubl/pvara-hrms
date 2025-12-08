@@ -45,7 +45,12 @@ const Login = () => {
       const result = await login(formData.email, formData.password);
       if (result.success) {
         navigate('/dashboard');
+      } else {
+        // Show error message from login
+        setErrors({ submit: result.error || 'Login failed. Please try again.' });
       }
+    } catch (error) {
+      setErrors({ submit: error.message || 'An unexpected error occurred' });
     } finally {
       setLoading(false);
     }
@@ -88,6 +93,18 @@ const Login = () => {
           <div className="relative backdrop-blur-2xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-1">Welcome Back</h2>
             <p className="text-slate-300 text-sm mb-8">Sign in to access your HRMS</p>
+
+            {/* Error Alert */}
+            {errors.submit && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-400/50 rounded-xl flex items-center gap-3">
+                <div className="text-red-400">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-red-300 text-sm">{errors.submit}</p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Input */}
