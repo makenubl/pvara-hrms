@@ -21,6 +21,8 @@ import Support from './pages/Support';
 import Status from './pages/Status';
 import Admin from './pages/Admin';
 import Integrations from './pages/Integrations';
+import RolesMatrix from './pages/RolesMatrix';
+import AccessReviews from './pages/AccessReviews';
 
 // SaaS Pages
 import Pricing from './pages/Pricing';
@@ -133,6 +135,14 @@ function App() {
         <Route
           path="/integrations"
           element={<ProtectedRoute><Integrations /></ProtectedRoute>}
+        />
+        <Route
+          path="/roles"
+          element={<ProtectedRoute><RolesMatrix /></ProtectedRoute>}
+        />
+        <Route
+          path="/access-reviews"
+          element={<ProtectedRoute><AccessReviews /></ProtectedRoute>}
         />
         <Route
           path="/support"

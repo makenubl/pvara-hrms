@@ -17,6 +17,8 @@ import {
   Activity,
   ShieldCheck,
   Plug,
+  Table2,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
@@ -39,6 +41,8 @@ const Sidebar = () => {
     { icon: BarChart3, label: 'Analytics', path: '/analytics' },
     { icon: DollarSign, label: 'Billing', path: '/subscription' },
     { icon: ShieldCheck, label: 'Admin', path: '/admin' },
+    { icon: Table2, label: 'Roles Matrix', path: '/roles' },
+    { icon: ClipboardCheck, label: 'Access Reviews', path: '/access-reviews' },
     { icon: Plug, label: 'Integrations', path: '/integrations' },
     { icon: LifeBuoy, label: 'Support', path: '/support' },
     { icon: Activity, label: 'Status', path: '/status' },
