@@ -1,41 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Calendar, BarChart3, DollarSign, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight, CheckCircle2, Clock } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
-import { handleAddEmployee, handleMarkAttendance, handleProcessPayroll, handleCreateJob } from '../utils/handlers';
 import { Card, Stat, Button, Badge } from '../components/UI';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import employeeService from '../services/employeeService';
+import approvalService from '../services/approvalService';
+import dashboardService from '../services/dashboardService';
+import { useAuthStore } from '../store/authStore';
 
 const Dashboard = () => {
   const [dateRange, setDateRange] = useState('this-month');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [metrics, setMetrics] = useState({
+    totalEmployees: 0,
+    presentToday: 0,
+    monthlyPayroll: 0,
+    pendingApprovals: 0,
+  });
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [performanceData, setPerformanceData] = useState([]);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const { user } = useAuthStore();
 
-  // Mock data
-  const attendanceData = [
-    { name: 'Mon', present: 85, absent: 15 },
-    { name: 'Tue', present: 88, absent: 12 },
-    { name: 'Wed', present: 90, absent: 10 },
-    { name: 'Thu', present: 87, absent: 13 },
-    { name: 'Fri', present: 92, absent: 8 },
-  ];
+  // Fetch dashboard data on mount and when dateRange changes
+  useEffect(() => {
+    fetchDashboardData();
+  }, [dateRange]);
 
-  const performanceData = [
-    { name: 'Jan', target: 100, actual: 95 },
-    { name: 'Feb', target: 100, actual: 98 },
-    { name: 'Mar', target: 100, actual: 102 },
-    { name: 'Apr', target: 100, actual: 99 },
-    { name: 'May', target: 100, actual: 105 },
-  ];
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch metrics
+      const metricsData = await dashboardService.getMetrics();
+      setMetrics(metricsData || metrics);
 
-  const pendingApprovals = [
-    { id: 1, type: 'Leave Request', requester: 'John Doe', days: 3, status: 'pending' },
-    { id: 2, type: 'Overtime', requester: 'Jane Smith', hours: 8, status: 'pending' },
-    { id: 3, type: 'Expense Claim', requester: 'Bob Johnson', amount: '$450', status: 'pending' },
-  ];
+      // Fetch attendance data
+      const attendData = await dashboardService.getAttendanceData(dateRange);
+      setAttendanceData(Array.isArray(attendData) ? attendData : attendData.data || []);
 
-  const recentActivities = [
-    { id: 1, action: 'New employee onboarded', employee: 'Sarah Williams', time: '2 hours ago', type: 'success' },
-    { id: 2, action: 'Payroll processed', amount: '$125,000', time: '4 hours ago', type: 'success' },
-    { id: 3, action: 'Performance review completed', employee: 'Michael Brown', time: '1 day ago', type: 'info' },
-  ];
+      // Fetch performance data
+      const perfData = await dashboardService.getPerformanceData(dateRange);
+      setPerformanceData(Array.isArray(perfData) ? perfData : perfData.data || []);
+
+      // Fetch pending approvals
+      const approvals = await approvalService.getPendingForMe();
+      const pendingList = Array.isArray(approvals) ? approvals : approvals.approvals || [];
+      setPendingApprovals(pendingList.slice(0, 3)); // Show top 3
+
+      // Fetch recent activities
+      const activities = await dashboardService.getRecentActivities(5);
+      setRecentActivities(Array.isArray(activities) ? activities : activities.activities || []);
+    } catch (err) {
+      setError(err.message || 'Failed to load dashboard data');
+      // Use mock data as fallback
+      setAttendanceData([
+        { name: 'Mon', present: 85, absent: 15 },
+        { name: 'Tue', present: 88, absent: 12 },
+        { name: 'Wed', present: 90, absent: 10 },
+        { name: 'Thu', present: 87, absent: 13 },
+        { name: 'Fri', present: 92, absent: 8 },
+      ]);
+      setPerformanceData([
+        { name: 'Jan', target: 100, actual: 95 },
+        { name: 'Feb', target: 100, actual: 98 },
+        { name: 'Mar', target: 100, actual: 102 },
+        { name: 'Apr', target: 100, actual: 99 },
+        { name: 'May', target: 100, actual: 105 },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <MainLayout>
@@ -60,6 +98,14 @@ const Dashboard = () => {
           </select>
         </div>
 
+        {/* Error Alert */}
+        {error && (
+          <div className="p-4 bg-red-500/20 border border-red-400/50 rounded-xl flex items-center gap-3">
+            <AlertCircle className="text-red-400" size={20} />
+            <p className="text-red-300">{error}</p>
+          </div>
+        )}
+
         {/* Key Metrics - Premium Glass Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Employees */}
@@ -72,11 +118,11 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-slate-400 text-sm font-medium">Total Employees</p>
-                <p className="text-3xl font-black text-white mt-1">324</p>
+                <p className="text-3xl font-black text-white mt-1">{loading ? '-' : metrics.totalEmployees || 324}</p>
               </div>
               <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
                 <ArrowUpRight className="w-4 h-4" />
-                12 this month
+                {loading ? '-' : '12 this month'}
               </div>
             </div>
           </div>
@@ -91,11 +137,11 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-slate-400 text-sm font-medium">Present Today</p>
-                <p className="text-3xl font-black text-white mt-1">298</p>
+                <p className="text-3xl font-black text-white mt-1">{loading ? '-' : metrics.presentToday || 298}</p>
               </div>
               <div className="flex items-center gap-1 text-xs font-semibold text-green-400">
                 <ArrowUpRight className="w-4 h-4" />
-                91.9% attendance
+                {loading ? '-' : '91.9% attendance'}
               </div>
             </div>
           </div>
@@ -110,11 +156,11 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-slate-400 text-sm font-medium">Monthly Payroll</p>
-                <p className="text-3xl font-black text-white mt-1">$125K</p>
+                <p className="text-3xl font-black text-white mt-1">{loading ? '-' : metrics.monthlyPayroll || '$125K'}</p>
               </div>
               <div className="flex items-center gap-1 text-xs font-semibold text-red-400">
                 <ArrowDownRight className="w-4 h-4" />
-                2% vs last month
+                {loading ? '-' : '2% vs last month'}
               </div>
             </div>
           </div>
@@ -129,61 +175,71 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-slate-400 text-sm font-medium">Pending Approvals</p>
-                <p className="text-3xl font-black text-white mt-1">7</p>
+                <p className="text-3xl font-black text-white mt-1">{loading ? '-' : pendingApprovals.length}</p>
               </div>
-              <p className="text-xs text-slate-300">3 leaves, 2 expenses</p>
+              <p className="text-xs text-slate-300">{pendingApprovals.length} items awaiting review</p>
             </div>
           </div>
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Attendance Chart */}
-          <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
-            <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent mb-6">Weekly Attendance</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={attendanceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="rgba(148,163,184,0.6)" />
-                <YAxis stroke="rgba(148,163,184,0.6)" />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(15,23,42,0.95)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '8px'
-                  }}
-                  labelStyle={{ color: '#e0f2fe' }}
-                />
-                <Legend />
-                <Bar dataKey="present" fill="#06b6d4" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="absent" fill="#ef4444" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        {!loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Attendance Chart */}
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
+              <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent mb-6">Weekly Attendance</h3>
+              {attendanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={attendanceData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis dataKey="name" stroke="rgba(148,163,184,0.6)" />
+                    <YAxis stroke="rgba(148,163,184,0.6)" />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(15,23,42,0.95)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '8px'
+                      }}
+                      labelStyle={{ color: '#e0f2fe' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="present" fill="#06b6d4" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="absent" fill="#ef4444" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-300 flex items-center justify-center text-slate-400">No data available</div>
+              )}
+            </div>
 
-          {/* Performance Trend */}
-          <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
-            <h3 className="text-lg font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-6">Performance Trend</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={performanceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="rgba(148,163,184,0.6)" />
-                <YAxis stroke="rgba(148,163,184,0.6)" />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(15,23,42,0.95)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '8px'
-                  }}
-                  labelStyle={{ color: '#e0f2fe' }}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="target" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
-                <Line type="monotone" dataKey="actual" stroke="#06b6d4" strokeWidth={2} dot={{ fill: '#06b6d4' }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {/* Performance Trend */}
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
+              <h3 className="text-lg font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-6">Performance Trend</h3>
+              {performanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis dataKey="name" stroke="rgba(148,163,184,0.6)" />
+                    <YAxis stroke="rgba(148,163,184,0.6)" />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(15,23,42,0.95)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '8px'
+                      }}
+                      labelStyle={{ color: '#e0f2fe' }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="target" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
+                    <Line type="monotone" dataKey="actual" stroke="#06b6d4" strokeWidth={2} dot={{ fill: '#06b6d4' }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-300 flex items-center justify-center text-slate-400">No data available</div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Pending Approvals and Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -196,18 +252,22 @@ const Dashboard = () => {
               </span>
             </div>
             <div className="space-y-3">
-              {pendingApprovals.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 backdrop-blur-sm bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/30 rounded-xl hover:border-amber-400/50 transition-all">
-                  <div>
-                    <p className="font-semibold text-white">{item.type}</p>
-                    <p className="text-sm text-slate-400">{item.requester}</p>
+              {pendingApprovals.length === 0 ? (
+                <p className="text-slate-400 text-sm text-center py-4">No pending approvals</p>
+              ) : (
+                pendingApprovals.map((item) => (
+                  <div key={item._id || item.id} className="flex items-center justify-between p-4 backdrop-blur-sm bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/30 rounded-xl hover:border-amber-400/50 transition-all">
+                    <div>
+                      <p className="font-semibold text-white">{item.type || 'Approval Request'}</p>
+                      <p className="text-sm text-slate-400">{item.employeeName || 'Employee'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-white">{item.days || item.amount || '-'}</p>
+                      <span className="inline-block px-2 py-1 mt-1 text-xs font-semibold rounded bg-amber-500/30 border border-amber-400/50 text-amber-300">Pending</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-white">{item.days || item.hours || item.amount}</p>
-                    <span className="inline-block px-2 py-1 mt-1 text-xs font-semibold rounded bg-amber-500/30 border border-amber-400/50 text-amber-300">Pending</span>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             <button className="w-full mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/50 hover:bg-gradient-to-r hover:from-cyan-500/30 hover:to-blue-500/30 text-sm font-semibold transition-all">
               View All Approvals
@@ -218,18 +278,22 @@ const Dashboard = () => {
           <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all shadow-lg">
             <h3 className="text-lg font-bold text-white mb-6">Recent Activity</h3>
             <div className="space-y-4">
-              {recentActivities.map((item) => (
-                <div key={item.id} className="flex items-start gap-4 pb-4 border-b border-white/10 last:border-b-0">
-                  <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                    item.type === 'success' ? 'bg-green-400' : 'bg-blue-400'
-                  }`}></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white">{item.action}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{item.employee || item.amount}</p>
-                    <p className="text-xs text-slate-500 mt-1">{item.time}</p>
+              {recentActivities.length === 0 ? (
+                <p className="text-slate-400 text-sm text-center py-4">No recent activities</p>
+              ) : (
+                recentActivities.map((item) => (
+                  <div key={item._id || item.id} className="flex items-start gap-4 pb-4 border-b border-white/10 last:border-b-0">
+                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                      item.type === 'success' ? 'bg-green-400' : 'bg-blue-400'
+                    }`}></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white">{item.action}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{item.employeeName || item.description || '-'}</p>
+                      <p className="text-xs text-slate-500 mt-1">{item.timestamp || item.time || 'Just now'}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             <button className="w-full mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-slate-500/20 to-slate-500/10 border border-slate-400/20 text-slate-300 hover:text-slate-200 hover:border-slate-400/40 text-sm font-semibold transition-all">
               View Activity Log
@@ -242,28 +306,24 @@ const Dashboard = () => {
           <h3 className="text-lg font-bold text-white mb-6">Quick Actions</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button
-              onClick={handleAddEmployee}
               className="group relative overflow-hidden rounded-lg py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-400/50 hover:border-cyan-400 hover:from-cyan-500/50 hover:to-blue-500/50 transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/40 to-blue-500/40 opacity-0 group-hover:opacity-100 blur-lg transition-opacity"></div>
               <span className="relative">Add Employee</span>
             </button>
             <button
-              onClick={handleMarkAttendance}
               className="group relative overflow-hidden rounded-lg py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-blue-500/30 to-purple-500/30 border border-blue-400/50 hover:border-blue-400 hover:from-blue-500/50 hover:to-purple-500/50 transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/40 to-purple-500/40 opacity-0 group-hover:opacity-100 blur-lg transition-opacity"></div>
               <span className="relative">Mark Attendance</span>
             </button>
             <button
-              onClick={handleProcessPayroll}
               className="group relative overflow-hidden rounded-lg py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 hover:border-purple-400 hover:from-purple-500/50 hover:to-pink-500/50 transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-pink-500/40 opacity-0 group-hover:opacity-100 blur-lg transition-opacity"></div>
               <span className="relative">Process Payroll</span>
             </button>
             <button
-              onClick={handleCreateJob}
               className="group relative overflow-hidden rounded-lg py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-pink-500/30 to-red-500/30 border border-pink-400/50 hover:border-pink-400 hover:from-pink-500/50 hover:to-red-500/50 transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500/40 to-red-500/40 opacity-0 group-hover:opacity-100 blur-lg transition-opacity"></div>

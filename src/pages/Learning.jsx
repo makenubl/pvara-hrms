@@ -1,168 +1,130 @@
-import React, { useState } from 'react';
-import { BookOpen, Star, Users, Clock, Plus, Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Award, Play, Users, Plus, AlertCircle } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
-import { Card, Button, Badge, Table } from '../components/UI';
+import { Button, Badge } from '../components/UI';
+import learningService from '../services/learningService';
+import { useAuthStore } from '../store/authStore';
 
 const Learning = () => {
   const [activeTab, setActiveTab] = useState('courses');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
+  const [certifications, setCertifications] = useState([]);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [enrollData, setEnrollData] = useState({ courseId: '' });
+  const { user } = useAuthStore();
 
-  const [courses] = useState([
-    {
-      id: 1,
-      title: 'React Fundamentals',
-      instructor: 'Sarah Chen',
-      category: 'Technology',
-      enrollees: 45,
-      rating: 4.8,
-      status: 'active',
-    },
-    {
-      id: 2,
-      title: 'Leadership Skills',
-      instructor: 'Mark Thompson',
-      category: 'Management',
-      enrollees: 32,
-      rating: 4.6,
-      status: 'active',
-    },
-    {
-      id: 3,
-      title: 'Project Management Basics',
-      instructor: 'Emily Rodriguez',
-      category: 'Management',
-      enrollees: 28,
-      rating: 4.5,
-      status: 'upcoming',
-    },
-  ]);
+  useEffect(() => {
+    fetchLearningData();
+  }, []);
 
-  const [enrollments] = useState([
-    {
-      id: 1,
-      employeeName: 'John Doe',
-      courseName: 'React Fundamentals',
-      enrolledDate: '2025-11-15',
-      progress: 75,
-      status: 'in-progress',
-    },
-    {
-      id: 2,
-      employeeName: 'Jane Smith',
-      courseName: 'Leadership Skills',
-      enrolledDate: '2025-10-20',
-      progress: 100,
-      status: 'completed',
-    },
-    {
-      id: 3,
-      employeeName: 'Mike Johnson',
-      courseName: 'React Fundamentals',
-      enrolledDate: '2025-12-01',
-      progress: 30,
-      status: 'in-progress',
-    },
-  ]);
+  const fetchLearningData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const coursesData = await learningService.getCourses('all');
+      const coursesList = Array.isArray(coursesData) ? coursesData : coursesData.courses || [];
+      setCourses(coursesList);
 
-  const courseColumns = [
-    {
-      key: 'title',
-      label: 'Course Name',
-      render: (value, row) => (
-        <div>
-          <p className="font-semibold text-white">{value}</p>
-          <p className="text-xs text-slate-400">{row.category}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'instructor',
-      label: 'Instructor',
-      render: (value) => <span className="text-slate-200">{value}</span>,
-    },
-    {
-      key: 'enrollees',
-      label: 'Enrollees',
-      render: (value) => <span className="text-white font-bold">{value}</span>,
-    },
-    {
-      key: 'rating',
-      label: 'Rating',
-      render: (value) => (
-        <div className="flex items-center gap-1">
-          <Star size={14} className="text-amber-400" />
-          <span className="text-white">{value}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (value) => <Badge variant={value === 'active' ? 'green' : 'blue'}>{value}</Badge>,
-    },
-  ];
+      const enrollmentsData = await learningService.getEnrollments(user?.id);
+      const enrollmentsList = Array.isArray(enrollmentsData) ? enrollmentsData : enrollmentsData.enrollments || [];
+      setEnrollments(enrollmentsList);
+
+      const certsData = await learningService.getCertifications(user?.id);
+      const certsList = Array.isArray(certsData) ? certsData : certsData.certifications || [];
+      setCertifications(certsList);
+    } catch (err) {
+      setError(err.message || 'Failed to load learning data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnroll = async () => {
+    try {
+      await learningService.enrollCourse(user?.id, enrollData.courseId);
+      setShowEnrollModal(false);
+      setEnrollData({ courseId: '' });
+      fetchLearningData();
+      alert('Enrolled successfully');
+    } catch (err) {
+      alert('Failed to enroll: ' + err.message);
+    }
+  };
 
   return (
     <MainLayout>
-      <div className="space-y-6 pb-6 text-slate-100">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
+      <div className="space-y-6 pb-6">
+        {error && (
+          <div className="p-4 bg-red-500/20 border border-red-400/50 rounded-xl flex items-center gap-3">
+            <AlertCircle className="text-red-400" size={20} />
+            <p className="text-red-300">{error}</p>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
               Learning & Development
             </h1>
-            <p className="text-slate-400 mt-2">Manage training programs and employee growth</p>
+            <p className="text-slate-400 mt-2">Explore courses and track certifications</p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button onClick={() => setShowEnrollModal(true)} className="flex items-center gap-2">
             <Plus size={20} />
-            New Course
+            Enroll Course
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-300 text-sm">Active Courses</p>
-                <p className="text-2xl font-black text-white mt-1">
-                  {courses.filter((c) => c.status === 'active').length}
-                </p>
+        {showEnrollModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 w-full max-w-md mx-4">
+              <h3 className="text-xl font-bold text-white mb-4">Enroll in Course</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Select Course</label>
+                  <select
+                    value={enrollData.courseId}
+                    onChange={(e) => setEnrollData({ ...enrollData, courseId: e.target.value })}
+                    className="w-full px-4 py-2 backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg text-white"
+                  >
+                    <option value="" className="bg-slate-900">Choose a course...</option>
+                    {courses.map((course) => (
+                      <option key={course._id || course.id} value={course._id || course.id} className="bg-slate-900">
+                        {course.title || course.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <button
+                    onClick={handleEnroll}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-400/30 text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/50 text-sm font-semibold transition-all"
+                  >
+                    Enroll
+                  </button>
+                  <button
+                    onClick={() => setShowEnrollModal(false)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-slate-500/20 border border-slate-400/30 text-slate-300 hover:border-slate-400/50 text-sm font-semibold transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-              <BookOpen className="w-8 h-8 text-cyan-400" />
             </div>
-          </Card>
-          <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-300 text-sm">Total Enrollments</p>
-                <p className="text-2xl font-black text-blue-300 mt-1">
-                  {enrollments.length}
-                </p>
-              </div>
-              <Users className="w-8 h-8 text-blue-400" />
-            </div>
-          </Card>
-          <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-300 text-sm">Completed</p>
-                <p className="text-2xl font-black text-emerald-300 mt-1">
-                  {enrollments.filter((e) => e.status === 'completed').length}
-                </p>
-              </div>
-              <Clock className="w-8 h-8 text-emerald-400" />
-            </div>
-          </Card>
-        </div>
+          </div>
+        )}
 
-        {/* Tabs */}
         <div className="flex gap-2 border-b border-white/10">
-          {['courses', 'enrollments'].map((tab) => (
+          {['courses', 'enrollments', 'certifications'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 font-medium text-sm transition-all ${
-                activeTab === tab ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-400'
+                activeTab === tab
+                  ? 'text-cyan-400 border-b-2 border-cyan-400'
+                  : 'text-slate-400 hover:text-slate-300'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -170,47 +132,92 @@ const Learning = () => {
           ))}
         </div>
 
-        {/* Courses Tab */}
         {activeTab === 'courses' && (
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-white">Available Courses</h3>
-              <Filter size={18} className="text-slate-400" />
-            </div>
-            <Table columns={courseColumns} data={courses} />
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {loading ? (
+              <p className="text-slate-400 col-span-full text-center py-8">Loading courses...</p>
+            ) : courses.length === 0 ? (
+              <p className="text-slate-400 col-span-full text-center py-8">No courses available</p>
+            ) : (
+              courses.map((course) => (
+                <div key={course._id || course.id} className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all">
+                  <div className="flex items-start justify-between mb-4">
+                    <BookOpen className="text-cyan-400" size={24} />
+                    <Badge variant="blue">{course.category || 'General'}</Badge>
+                  </div>
+                  <h3 className="text-lg font-bold text-white">{course.title || course.name}</h3>
+                  <p className="text-sm text-slate-400 mt-2">{course.description || 'Course details'}</p>
+                  <div className="flex items-center gap-2 mt-4 text-xs text-slate-300">
+                    <Users size={16} />
+                    {course.enrolledCount || 0} enrolled
+                  </div>
+                  <button className="w-full mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-400/30 text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/50 text-sm font-semibold transition-all">
+                    View Course
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         )}
 
-        {/* Enrollments Tab */}
         {activeTab === 'enrollments' && (
-          <Card>
-            <h3 className="font-semibold text-white mb-4">Active Enrollments</h3>
-            <div className="space-y-3">
-              {enrollments.map((enroll) => (
-                <div key={enroll.id} className="p-4 bg-white/5 border border-white/10 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-medium text-white">{enroll.employeeName}</p>
-                      <p className="text-sm text-slate-300">{enroll.courseName}</p>
-                      <p className="text-xs text-slate-400 mt-1">Enrolled: {enroll.enrolledDate}</p>
+          <div className="space-y-4">
+            {loading ? (
+              <p className="text-slate-400 text-center py-8">Loading enrollments...</p>
+            ) : enrollments.length === 0 ? (
+              <p className="text-slate-400 text-center py-8">No enrollments yet</p>
+            ) : (
+              enrollments.map((enrollment) => (
+                <div key={enrollment._id || enrollment.id} className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-6 hover:border-white/30 transition-all">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{enrollment.courseTitle || enrollment.courseName}</h3>
+                      <p className="text-sm text-slate-400 mt-1">{enrollment.instructorName || 'Instructor'}</p>
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-slate-300">Progress</span>
+                          <span className="text-xs font-semibold text-cyan-300">{enrollment.progress || 0}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500" style={{ width: `${enrollment.progress || 0}%` }}></div>
+                        </div>
+                      </div>
                     </div>
-                    <Badge
-                      variant={enroll.status === 'completed' ? 'green' : 'blue'}
-                    >
-                      {enroll.status}
-                    </Badge>
+                    <button className="ml-4 px-3 py-2 rounded-lg text-cyan-300 border border-cyan-400/30 hover:border-cyan-400/50 text-xs font-semibold transition-all flex items-center gap-1">
+                      <Play size={14} />
+                      Continue
+                    </button>
                   </div>
-                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-cyan-400 to-blue-400 h-full transition-all"
-                      style={{ width: `${enroll.progress}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-slate-300 mt-2">{enroll.progress}% Complete</p>
                 </div>
-              ))}
-            </div>
-          </Card>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 'certifications' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {loading ? (
+              <p className="text-slate-400 col-span-full text-center py-8">Loading certifications...</p>
+            ) : certifications.length === 0 ? (
+              <p className="text-slate-400 col-span-full text-center py-8">No certifications earned yet</p>
+            ) : (
+              certifications.map((cert) => (
+                <div key={cert._id || cert.id} className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-amber-400/30 rounded-2xl p-6 hover:border-amber-400/50 transition-all">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Award className="text-amber-400" size={20} />
+                        <span className="text-sm font-bold text-amber-300">Certified</span>
+                      </div>
+                      <h3 className="text-lg font-bold text-white">{cert.name}</h3>
+                      <p className="text-sm text-slate-400 mt-1">Earned: {cert.earnedDate || 'Today'}</p>
+                      <p className="text-xs text-slate-500 mt-2">ID: {cert.certificateId || 'CERT-001'}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
     </MainLayout>
