@@ -13,6 +13,8 @@ import {
   Settings,
   Menu,
   X,
+  LifeBuoy,
+  Activity,
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
@@ -33,6 +35,9 @@ const Sidebar = () => {
     { icon: BookOpen, label: 'Learning & Development', path: '/learning' },
     { icon: Shield, label: 'Compliance', path: '/compliance' },
     { icon: BarChart3, label: 'Analytics', path: '/analytics' },
+    { icon: DollarSign, label: 'Billing', path: '/subscription' },
+    { icon: LifeBuoy, label: 'Support', path: '/support' },
+    { icon: Activity, label: 'Status', path: '/status' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 

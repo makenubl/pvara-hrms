@@ -17,6 +17,8 @@ import Learning from './pages/Learning';
 import Compliance from './pages/Compliance';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import Support from './pages/Support';
+import Status from './pages/Status';
 
 // SaaS Pages
 import Pricing from './pages/Pricing';
@@ -121,6 +123,14 @@ function App() {
         <Route
           path="/subscription"
           element={<ProtectedRoute><SubscriptionManagement /></ProtectedRoute>}
+        />
+        <Route
+          path="/support"
+          element={<ProtectedRoute><Support /></ProtectedRoute>}
+        />
+        <Route
+          path="/status"
+          element={<ProtectedRoute><Status /></ProtectedRoute>}
         />
 
         {/* Catch-all redirect */}
