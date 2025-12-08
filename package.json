@@ -1,15 +1,19 @@
 {
   "name": "pvara-hrms",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Premium HRMS with glass UI and full-featured REST API",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
+    "backend:install": "cd backend && npm install",
     "backend:dev": "cd backend && npm run dev",
-    "backend:build": "cd backend && npm install && npm run build"
+    "backend:build": "cd backend && npm install && npm run build",
+    "start": "npm run build && npm run backend:dev",
+    "setup": "npm install && npm run backend:install"
   },
   "dependencies": {
     "autoprefixer": "^10.4.22",

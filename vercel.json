@@ -1,14 +1,15 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "version": 2,
+  "buildCommand": "cd frontend && npm run build || npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm install && cd backend && npm install",
   "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
+    "MONGODB_URI": "@MONGODB_URI",
+    "JWT_SECRET": "@JWT_SECRET",
     "NODE_ENV": "production"
   },
   "functions": {
-    "backend/**/*.js": {
+    "backend/api/**.[jt]s": {
       "memory": 1024,
       "maxDuration": 10
     }
@@ -16,7 +17,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/api/$1"
+      "destination": "backend/api/index.js"
     }
   ]
 }
