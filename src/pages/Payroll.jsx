@@ -114,12 +114,14 @@ const Payroll = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="space-y-6 pb-6">
+        {/* Header with gradient */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Payroll Management</h1>
-            <p className="text-gray-600">Manage salaries, payslips, and compensation</p>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Payroll Management
+            </h1>
+            <p className="text-slate-400 mt-2">Process and manage employee payroll</p>
           </div>
           <div className="flex gap-2">
             <input

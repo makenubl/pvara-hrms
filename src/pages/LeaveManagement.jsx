@@ -135,12 +135,14 @@ const LeaveManagement = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="space-y-6 pb-6">
+        {/* Header with gradient */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Leave Management</h1>
-            <p className="text-gray-600">Request, approve, and track leave</p>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Leave Management
+            </h1>
+            <p className="text-slate-400 mt-2">Manage employee leave requests and balances</p>
           </div>
           <Button 
             className="flex items-center gap-2"
