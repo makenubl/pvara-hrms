@@ -1,0 +1,22 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "backend/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/api/$1"
+    }
+  ]
+}
