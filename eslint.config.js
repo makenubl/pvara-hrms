@@ -22,7 +22,7 @@ const combinedSettings = {
 
 export default [
   {
-    ignores: ['dist'],
+    ignores: ['dist', 'backend/**'],
   },
   {
     files: ['**/*.{js,jsx}'],
