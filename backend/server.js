@@ -29,10 +29,8 @@ app.use(express.json());
 // Connect to database
 connectDB();
 
-// Seed dev data (only in non-production)
-if (process.env.NODE_ENV !== 'production') {
-  seedDevData().catch((err) => console.error('Seed error', err));
-}
+// Seed dev data (runs once on cold start for Vercel)
+seedDevData().catch((err) => console.error('Seed error', err));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -76,3 +74,6 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err);
 });
+
+// Export for Vercel serverless
+export default app;
