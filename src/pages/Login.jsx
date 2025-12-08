@@ -42,13 +42,8 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const result = await login(formData.email, formData.password);
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        // Show error message from login
-        setErrors({ submit: result.error || 'Login failed. Please try again.' });
-      }
+      await login(formData.email, formData.password);
+      navigate('/dashboard');
     } catch (error) {
       setErrors({ submit: error.message || 'An unexpected error occurred' });
     } finally {
@@ -162,8 +157,8 @@ const Login = () => {
               <div className="relative overflow-hidden rounded-xl p-4 backdrop-blur-sm bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-400/30">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
                 <p className="text-xs font-semibold text-amber-100 mb-2 relative z-10">Demo Credentials</p>
-                <p className="text-xs text-amber-200/80 relative z-10">Email: <span className="font-mono">demo@pvara.com</span></p>
-                <p className="text-xs text-amber-200/80 relative z-10">Password: <span className="font-mono">demo123</span></p>
+                <p className="text-xs text-amber-200/80 relative z-10">Email: <span className="font-mono">admin@pvara.com</span></p>
+                <p className="text-xs text-amber-200/80 relative z-10">Password: <span className="font-mono">Admin@123</span></p>
               </div>
 
               {/* Sign In Button */}

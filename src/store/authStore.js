@@ -1,94 +1,63 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import axios from 'axios';
 
-// Define test accounts with permissions
-const TEST_ACCOUNTS = {
-  'admin@pvara.com': {
-    name: 'Admin User',
-    role: 'SUPER_ADMIN',
-    department: 'Executive',
-    permissions: [
-      'view_employees',
-      'manage_employees',
-      'approve_leave',
-      'manage_payroll',
-      'view_attendance',
-      'manage_attendance',
-      'view_performance',
-      'manage_performance',
-      'manage_recruitment',
-      'view_analytics',
-      'manage_settings',
-      'view_compliance',
-      'manage_compliance',
-      'manage_learning',
-    ],
-  },
-  'demo@pvara.com': {
-    name: 'John Doe',
-    role: 'HR_MANAGER',
-    department: 'Human Resources',
-    permissions: [
-      'view_employees',
-      'manage_employees',
-      'approve_leave',
-      'manage_payroll',
-      'view_attendance',
-      'view_performance',
-      'manage_recruitment',
-      'view_analytics',
-    ],
-  },
-  'manager@pvara.com': {
-    name: 'Manager User',
-    role: 'DEPARTMENT_MANAGER',
-    department: 'Engineering',
-    permissions: [
-      'view_employees',
-      'approve_leave',
-      'view_attendance',
-      'view_performance',
-      'manage_recruitment',
-    ],
-  },
-  'hr@pvara.com': {
-    name: 'HR Executive',
-    role: 'HR_EXECUTIVE',
-    department: 'Human Resources',
-    permissions: [
-      'view_employees',
-      'manage_employees',
-      'approve_leave',
-      'view_attendance',
-      'view_performance',
-      'manage_recruitment',
-      'view_analytics',
-      'manage_learning',
-    ],
-  },
-  'finance@pvara.com': {
-    name: 'Finance User',
-    role: 'FINANCE',
-    department: 'Finance',
-    permissions: [
-      'view_employees',
-      'view_payroll',
-      'manage_payroll',
-      'view_analytics',
-    ],
-  },
-  'employee@pvara.com': {
-    name: 'Employee User',
-    role: 'EMPLOYEE',
-    department: 'Technology',
-    permissions: [
-      'view_own_profile',
-      'apply_leave',
-      'view_own_payslips',
-      'view_courses',
-      'enroll_courses',
-    ],
-  },
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// Map backend roles to frontend roles/permissions
+const ROLE_MAP = {
+  admin: 'SUPER_ADMIN',
+  hr: 'HR_MANAGER',
+  manager: 'DEPARTMENT_MANAGER',
+  employee: 'EMPLOYEE',
+};
+
+const PERMISSIONS_BY_ROLE = {
+  SUPER_ADMIN: [
+    'view_employees',
+    'manage_employees',
+    'approve_leave',
+    'manage_payroll',
+    'view_attendance',
+    'manage_attendance',
+    'view_performance',
+    'manage_performance',
+    'manage_recruitment',
+    'view_analytics',
+    'manage_settings',
+    'view_compliance',
+    'manage_compliance',
+    'manage_learning',
+  ],
+  HR_MANAGER: [
+    'view_employees',
+    'manage_employees',
+    'approve_leave',
+    'manage_payroll',
+    'view_attendance',
+    'view_performance',
+    'manage_recruitment',
+    'view_analytics',
+  ],
+  DEPARTMENT_MANAGER: [
+    'view_employees',
+    'approve_leave',
+    'view_attendance',
+    'view_performance',
+    'manage_recruitment',
+  ],
+  HR_EXECUTIVE: [
+    'view_employees',
+    'manage_employees',
+    'approve_leave',
+    'view_attendance',
+    'view_performance',
+    'manage_recruitment',
+    'view_analytics',
+    'manage_learning',
+  ],
+  FINANCE: ['view_employees', 'view_payroll', 'manage_payroll', 'view_analytics'],
+  EMPLOYEE: ['view_own_profile', 'apply_leave', 'view_own_payslips', 'view_courses', 'enroll_courses'],
 };
 
 export const useAuthStore = create(
@@ -96,6 +65,7 @@ export const useAuthStore = create(
     (set) => ({
       user: null,
       token: null,
+      isAuthenticated: false,
       isLoading: false,
       error: null,
       role: null,
@@ -104,65 +74,35 @@ export const useAuthStore = create(
       login: async (email, password) => {
         set({ isLoading: true, error: null });
         try {
-          // Validate email format
-          if (!email || !email.includes('@')) {
-            throw new Error('Please enter a valid email address');
-          }
+          const response = await axios.post(`${API_URL}/auth/login`, { email, password });
 
-          // Check if this is a known test account
-          const accountInfo = TEST_ACCOUNTS[email.toLowerCase()];
-          
-          if (!accountInfo) {
-            // For any other email, create a generic user
-            const mockUser = {
-              id: Math.random().toString(36).substr(2, 9),
-              name: email.split('@')[0],
-              email: email.toLowerCase(),
-              role: 'EMPLOYEE',
-              department: 'Technology',
-              avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-              permissions: [
-                'view_own_profile',
-                'apply_leave',
-                'view_own_payslips',
-                'view_courses',
-              ],
-            };
+          const { token, user: profile } = response.data;
+          const mappedRole = ROLE_MAP[profile.role] || profile.role || 'EMPLOYEE';
+          const permissions = PERMISSIONS_BY_ROLE[mappedRole] || PERMISSIONS_BY_ROLE.EMPLOYEE;
 
-            set({
-              user: mockUser,
-              token: `mock-jwt-token-${Date.now()}`,
-              role: mockUser.role,
-              permissions: mockUser.permissions,
-              isLoading: false,
-            });
-
-            return { success: true, user: mockUser };
-          }
-
-          // Use test account info
-          const mockUser = {
-            id: email.toLowerCase().split('@')[0],
-            name: accountInfo.name,
-            email: email.toLowerCase(),
-            role: accountInfo.role,
-            department: accountInfo.department,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${accountInfo.name}`,
-            permissions: accountInfo.permissions,
+          const user = {
+            id: profile._id,
+            email: profile.email,
+            name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.name || 'User',
+            role: mappedRole,
+            department: profile.department || 'General',
+            permissions,
           };
 
           set({
-            user: mockUser,
-            token: `mock-jwt-token-${Date.now()}`,
-            role: mockUser.role,
-            permissions: mockUser.permissions,
+            user,
+            token,
+            role: mappedRole,
+            permissions,
+            isAuthenticated: true,
             isLoading: false,
+            error: null,
           });
-
-          return { success: true, user: mockUser };
-        } catch (error) {
-          set({ error: error.message, isLoading: false });
-          return { success: false, error: error.message };
+          return user;
+        } catch (err) {
+          const message = err?.response?.data?.message || err?.message || 'Login failed';
+          set({ error: message, isLoading: false, isAuthenticated: false, token: null, user: null });
+          throw new Error(message);
         }
       },
 
@@ -172,6 +112,9 @@ export const useAuthStore = create(
           token: null,
           role: null,
           permissions: [],
+          error: null,
+          isLoading: false,
+          isAuthenticated: false,
         });
       },
 
@@ -195,8 +138,6 @@ export const useAuthStore = create(
         return state.role && role.includes(state.role);
       },
 
-      // Helper to get test accounts list
-      getTestAccounts: () => TEST_ACCOUNTS,
     }),
     {
       name: 'auth-store',
@@ -205,6 +146,7 @@ export const useAuthStore = create(
         token: state.token,
         role: state.role,
         permissions: state.permissions,
+        isAuthenticated: state.isAuthenticated,
       }),
     }
   )
