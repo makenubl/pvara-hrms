@@ -13,14 +13,17 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import brandLogo from '../logo.svg';
+import { useNavigate } from 'react-router-dom';
+import pvaraLogo from '../pvara-logo.svg';
 
 const Sidebar = () => {
   const { sidebarOpen, toggleSidebar } = useAppStore();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const menuItems = [
@@ -39,13 +42,18 @@ const Sidebar = () => {
 
   const isActive = (path) => location.pathname.startsWith(path);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <>
       {/* Mobile Toggle */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleSidebar}
-          className="bg-blue-600 text-white p-2 rounded-lg"
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-2 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
         >
           {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -55,54 +63,76 @@ const Sidebar = () => {
       <aside
         className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:static inset-y-0 left-0 w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white transition-transform duration-300 z-40 md:z-auto overflow-y-auto`}
+        } md:translate-x-0 fixed md:static inset-y-0 left-0 w-64 backdrop-blur-xl bg-gradient-to-b from-slate-900/80 via-slate-900/70 to-slate-900/60 border-r border-white/10 text-white transition-transform duration-300 z-40 md:z-auto overflow-y-auto shadow-2xl`}
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-blue-700">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <div className="w-8 h-8 bg-white/80 rounded-lg flex items-center justify-center p-1">
-              <img src={brandLogo} alt="PVARA" className="w-6 h-6" />
+        {/* Logo Header */}
+        <div className="p-6 border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+          <Link to="/dashboard" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-10">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg opacity-30 group-hover:opacity-50 blur-lg transition-opacity"></div>
+              <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-lg p-1 flex items-center justify-center">
+                <img src={pvaraLogo} alt="PVARA" className="w-6 h-6" />
+              </div>
             </div>
-            PVARA
-          </h1>
-          <p className="text-sm text-blue-300 mt-1">{user?.company || 'Enterprise'}</p>
+            <div>
+              <h1 className="text-xl font-black bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                PVARA
+              </h1>
+              <p className="text-xs text-slate-400">{user?.company || 'Enterprise'}</p>
+            </div>
+          </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const active = isActive(item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={() => !sidebarOpen && toggleSidebar()}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.path)
-                    ? 'bg-blue-700 text-white'
-                    : 'text-blue-100 hover:bg-blue-700'
+                onClick={() => sidebarOpen && toggleSidebar()}
+                className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
+                  active
+                    ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/20 border border-cyan-400/50 text-cyan-100'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon size={20} />
-                <span className="text-sm font-medium">{item.label}</span>
+                {active && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/40 to-blue-500/30 blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-50"></div>
+                )}
+                <Icon size={20} className={`relative z-10 transition-transform ${active ? 'text-cyan-300' : ''}`} />
+                <span className="text-sm font-semibold relative z-10">{item.label}</span>
+                {active && (
+                  <div className="ml-auto w-1.5 h-1.5 bg-cyan-400 rounded-full relative z-10 animate-pulse"></div>
+                )}
               </Link>
             );
           })}
         </nav>
 
+        {/* Divider */}
+        <div className="mx-4 my-4 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
         {/* User Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700 bg-blue-800">
-          <div className="flex items-center gap-3">
-            <img
-              src={user?.avatar}
-              alt={user?.name}
-              className="w-10 h-10 rounded-full"
-            />
+        <div className="px-4 py-4 rounded-xl bg-gradient-to-r from-white/5 to-white/0 border border-white/10 m-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {user?.name?.charAt(0) || 'A'}
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-blue-300 truncate">{user?.email}</p>
+              <p className="text-sm font-semibold text-white truncate">{user?.name || 'Ayesha Khan'}</p>
+              <p className="text-xs text-slate-400 truncate">{user?.email || 'ayesha@pvara.com'}</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 text-red-300 hover:text-red-200 hover:border-red-400/50 hover:bg-gradient-to-r hover:from-red-500/30 hover:to-pink-500/30 text-xs font-semibold transition-all"
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
         </div>
       </aside>
     </>
