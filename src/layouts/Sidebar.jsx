@@ -15,6 +15,8 @@ import {
   X,
   LifeBuoy,
   Activity,
+  ShieldCheck,
+  Plug,
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
@@ -36,6 +38,8 @@ const Sidebar = () => {
     { icon: Shield, label: 'Compliance', path: '/compliance' },
     { icon: BarChart3, label: 'Analytics', path: '/analytics' },
     { icon: DollarSign, label: 'Billing', path: '/subscription' },
+    { icon: ShieldCheck, label: 'Admin', path: '/admin' },
+    { icon: Plug, label: 'Integrations', path: '/integrations' },
     { icon: LifeBuoy, label: 'Support', path: '/support' },
     { icon: Activity, label: 'Status', path: '/status' },
     { icon: Settings, label: 'Settings', path: '/settings' },

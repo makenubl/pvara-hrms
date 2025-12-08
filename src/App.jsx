@@ -19,6 +19,8 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Support from './pages/Support';
 import Status from './pages/Status';
+import Admin from './pages/Admin';
+import Integrations from './pages/Integrations';
 
 // SaaS Pages
 import Pricing from './pages/Pricing';
@@ -123,6 +125,14 @@ function App() {
         <Route
           path="/subscription"
           element={<ProtectedRoute><SubscriptionManagement /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin"
+          element={<ProtectedRoute><Admin /></ProtectedRoute>}
+        />
+        <Route
+          path="/integrations"
+          element={<ProtectedRoute><Integrations /></ProtectedRoute>}
         />
         <Route
           path="/support"
