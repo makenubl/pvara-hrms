@@ -23,6 +23,7 @@ import {
   Award
 } from 'lucide-react';
 import { Button } from '../components/UI';
+import brandLogo from '../logo.svg';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const LandingPage = () => {
       name: 'Sarah Johnson',
       role: 'HR Director',
       company: 'TechCorp Inc.',
-      quote: 'HRMS transformed how we manage our 500+ employees. The automation saved us 20 hours per week on administrative tasks.',
+      quote: 'PVARA transformed how we manage our 500+ employees. The automation saved us 20 hours per week on administrative tasks.',
       rating: 5,
     },
     {
@@ -132,10 +133,8 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-xl shadow-blue-400/30 hover:shadow-blue-400/50 transition-shadow duration-300">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent tracking-tight">HRMS</span>
+              <img src={brandLogo} alt="PVARA" className="w-10 h-10 rounded-xl shadow-xl shadow-blue-400/30 hover:shadow-blue-400/50 transition-shadow duration-300 bg-white/80 p-1" />
+              <span className="text-2xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent tracking-tight">PVARA</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -326,7 +325,7 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
-                Why Choose HRMS?
+                Why Choose PVARA?
               </h2>
               <p className="text-xl text-slate-700 mb-8 font-medium">
                 We're more than just software. We're your partner in building a 
@@ -371,7 +370,7 @@ const LandingPage = () => {
               Loved by HR Teams Worldwide
             </h2>
             <p className="text-xl text-slate-600 font-medium">
-              See what our customers have to say about their experience with HRMS.
+              See what our customers have to say about their experience with PVARA.
             </p>
           </div>
 
@@ -408,8 +407,8 @@ const LandingPage = () => {
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
             Ready to Transform Your HR?
           </h2>
-          <p className="text-xl text-slate-600 mb-8 font-medium">
-            Join 10,000+ companies already using HRMS to manage their workforce. 
+            <p className="text-xl text-slate-600 mb-8 font-medium">
+            Join 10,000+ companies already using PVARA to manage their workforce. 
             Start your free 14-day trial today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -442,10 +441,10 @@ const LandingPage = () => {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-400/30">
-                  <Users className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 bg-white/80 rounded-xl flex items-center justify-center shadow-lg shadow-blue-400/30 p-1">
+                  <img src={brandLogo} alt="PVARA" className="w-8 h-8" />
                 </div>
-                <span className="text-xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent">HRMS</span>
+                <span className="text-xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent">PVARA</span>
               </div>
               <p className="text-slate-600 font-medium">
                 The modern HR platform for growing businesses. Simplify your workforce management today.
@@ -481,7 +480,7 @@ const LandingPage = () => {
           </div>
           <div className="border-t border-white/60 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-slate-500 text-sm font-semibold">
-              © 2025 HRMS. All rights reserved.
+              © 2025 PVARA. All rights reserved.
             </p>
             <div className="flex gap-4">
               <a href="#" className="text-slate-600 hover:text-slate-900 transition-colors">

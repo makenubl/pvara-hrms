@@ -52,7 +52,7 @@ const Settings = () => {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
-          <p className="text-gray-600">Manage your HRMS configuration</p>
+          <p className="text-gray-600">Manage your PVARA configuration</p>
         </div>
 
         {/* Tabs */}
@@ -243,7 +243,7 @@ const Settings = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">System Information</h3>
             <div className="space-y-4">
               <div className="p-3 bg-gray-50 rounded">
-                <p className="text-sm text-gray-600">HRMS Version</p>
+                <p className="text-sm text-gray-600">PVARA Version</p>
                 <p className="font-semibold text-gray-800">1.0.0</p>
               </div>
               <div className="p-3 bg-gray-50 rounded">
@@ -256,7 +256,7 @@ const Settings = () => {
               </div>
               <div className="p-3 bg-gray-50 rounded">
                 <p className="text-sm text-gray-600">API Endpoint</p>
-                <p className="font-semibold text-gray-800">https://api.hrms.company.com</p>
+                <p className="font-semibold text-gray-800">https://api.pvara.com</p>
               </div>
               <Button>Check for Updates</Button>
             </div>

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
+import brandLogo from '../logo.svg';
 
 const Sidebar = () => {
   const { sidebarOpen, toggleSidebar } = useAppStore();
@@ -72,10 +73,10 @@ const Sidebar = () => {
         {/* Logo */}
         <div className="p-6 border-b border-blue-700">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
-              <Users size={20} />
+            <div className="w-8 h-8 bg-white/80 rounded-lg flex items-center justify-center p-1">
+              <img src={brandLogo} alt="PVARA" className="w-6 h-6" />
             </div>
-            HRMS
+            PVARA
           </h1>
           <p className="text-sm text-blue-300 mt-1">{user?.company || 'Enterprise'}</p>
         </div>

@@ -8,14 +8,14 @@ const Integrations = () => {
     { name: 'Slack', icon: <Slack className="w-5 h-5" />, status: 'Live', desc: 'Approvals, alerts, and HR bot in Slack.' },
     { name: 'Workday', icon: <Cloud className="w-5 h-5" />, status: 'Live', desc: 'HR data sync and payroll exports.' },
     { name: 'BambooHR', icon: <LeafIcon />, status: 'Live', desc: 'Employee records and PTO sync.' },
-    { name: 'Greenhouse', icon: <Plug className="w-5 h-5" />, status: 'Beta', desc: 'ATS to HRMS candidate conversion.' },
+    { name: 'Greenhouse', icon: <Plug className="w-5 h-5" />, status: 'Beta', desc: 'ATS to PVARA candidate conversion.' },
     { name: 'Lever', icon: <Plug className="w-5 h-5" />, status: 'Beta', desc: 'Hiring pipeline to onboarding flows.' },
     { name: 'Okta', icon: <ShieldIcon />, status: 'Live', desc: 'SCIM/SSO for identity lifecycle.' },
   ];
 
   const webhooks = [
-    { name: 'Employee created', url: 'https://hooks.company.com/hrms/employee', secret: '•••••••a9c', status: 'Active' },
-    { name: 'Payroll processed', url: 'https://hooks.company.com/hrms/payroll', secret: '•••••••b4k', status: 'Active' },
+    { name: 'Employee created', url: 'https://hooks.company.com/pvara/employee', secret: '•••••••a9c', status: 'Active' },
+    { name: 'Payroll processed', url: 'https://hooks.company.com/pvara/payroll', secret: '•••••••b4k', status: 'Active' },
   ];
 
   return (
@@ -25,7 +25,7 @@ const Integrations = () => {
           <div>
             <p className="text-sm font-semibold text-blue-600">Platform & Extensibility</p>
             <h1 className="text-3xl font-bold text-gray-900">Integrations, API, and Webhooks</h1>
-            <p className="text-gray-600 max-w-2xl">Enterprise-grade integrations, API keys, and event webhooks to embed HRMS into your stack.</p>
+            <p className="text-gray-600 max-w-2xl">Enterprise-grade integrations, API keys, and event webhooks to embed PVARA into your stack.</p>
           </div>
           <div className="flex gap-3">
             <Button variant="secondary" className="bg-white border border-gray-200">View docs</Button>
