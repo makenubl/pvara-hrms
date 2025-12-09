@@ -45,28 +45,15 @@ const SubscriptionManagement = () => {
     }
   };
 
+  const [billingHistory] = useState([
+    // Billing history will be populated from API when backend is ready
+    // For now showing empty state
+  ]);
+
   const handleDownloadInvoice = (invoice) => {
     toast.success(`Downloading invoice ${invoice.id}...`);
     // In real app, download PDF invoice
   };
-
-  // Mock billing history
-  const billingHistory = [
-    {
-      id: 'INV-2024-001',
-      date: '2024-01-15',
-      amount: currentPlan?.price || 0,
-      status: 'paid',
-      planName: currentPlan?.name || 'N/A',
-    },
-    {
-      id: 'INV-2023-012',
-      date: '2023-12-15',
-      amount: currentPlan?.price || 0,
-      status: 'paid',
-      planName: currentPlan?.name || 'N/A',
-    },
-  ];
 
   if (!subscription || !currentPlan) {
     return (

@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import Position from '../models/Position.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
 
@@ -54,8 +55,9 @@ router.post('/', authenticate, authorize(['hr', 'admin']), async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password or generate default one
+    const passwordToUse = password || 'Welcome@123';
+    const hashedPassword = await bcrypt.hash(passwordToUse, 10);
 
     const employee = new User({
       firstName,
@@ -74,8 +76,14 @@ router.post('/', authenticate, authorize(['hr', 'admin']), async (req, res) => {
     });
 
     const savedEmployee = await employee.save();
+    
+    // Increment employeeCount for the position
+    if (position) {
+      await Position.findByIdAndUpdate(position, { $inc: { employeeCount: 1 } });
+    }
+    
     const populatedEmployee = await savedEmployee.populate([
-      { path: 'position', select: 'title department' },
+      { path: 'position', select: 'title department positionId' },
       { path: 'reportsTo', select: 'firstName lastName' },
     ]);
 
@@ -91,16 +99,28 @@ router.put('/:id', authenticate, authorize(['hr', 'admin']), async (req, res) =>
     // Prevent password updates through this endpoint
     delete req.body.password;
 
+    const oldEmployee = await User.findById(req.params.id);
+    if (!oldEmployee) return res.status(404).json({ message: 'Employee not found' });
+
+    // Handle position change
+    if (req.body.position && req.body.position !== oldEmployee.position?.toString()) {
+      // Decrement old position count
+      if (oldEmployee.position) {
+        await Position.findByIdAndUpdate(oldEmployee.position, { $inc: { employeeCount: -1 } });
+      }
+      // Increment new position count
+      await Position.findByIdAndUpdate(req.body.position, { $inc: { employeeCount: 1 } });
+    }
+
     const employee = await User.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     ).populate([
-      { path: 'position', select: 'title department' },
+      { path: 'position', select: 'title department positionId' },
       { path: 'reportsTo', select: 'firstName lastName' },
     ]);
 
-    if (!employee) return res.status(404).json({ message: 'Employee not found' });
     res.json(employee);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -133,6 +153,12 @@ router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
     );
 
     if (!employee) return res.status(404).json({ message: 'Employee not found' });
+    
+    // Decrement employeeCount for the position
+    if (employee.position) {
+      await Position.findByIdAndUpdate(employee.position, { $inc: { employeeCount: -1 } });
+    }
+    
     res.json({ message: 'Employee deactivated', employee });
   } catch (error) {
     res.status(500).json({ message: error.message });

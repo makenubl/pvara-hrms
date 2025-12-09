@@ -24,14 +24,12 @@ const LeaveManagement = () => {
     endDate: '',
     reason: '',
   });
-
-  // Mock leave balance for now (can be replaced with API later)
-  const leaveBalance = {
-    annual: { used: 12, balance: 8, total: 20 },
-    sick: { used: 2, balance: 8, total: 10 },
-    personal: { used: 1, balance: 4, total: 5 },
+  const [leaveBalance, setLeaveBalance] = useState({
+    annual: { used: 0, balance: 20, total: 20 },
+    sick: { used: 0, balance: 10, total: 10 },
+    personal: { used: 0, balance: 5, total: 5 },
     casual: { used: 0, balance: 3, total: 3 },
-  };
+  });
 
   const statusIcons = {
     approved: <CheckCircle className="w-5 h-5 text-emerald-300" />,

@@ -59,8 +59,16 @@ const Settings = () => {
   const [newPosition, setNewPosition] = useState({
     title: '',
     department: '',
+    description: '',
     reportsTo: null,
+    isTopLevel: false,
     level: 'mid',
+    grossSalary: '',
+    salary_range_min: '',
+    salary_range_max: '',
+    benefits: '',
+    responsibilities: '',
+    requirements: '',
   });
 
   const [newPositionError, setNewPositionError] = useState(null);
@@ -95,8 +103,19 @@ const Settings = () => {
   };
 
   const handlePositionChange = (e) => {
-    const { name, value } = e.target;
-    setNewPosition((prev) => ({ ...prev, [name]: name === 'reportsTo' ? (value ? value : null) : value }));
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox' && name === 'isTopLevel') {
+      setNewPosition((prev) => ({ 
+        ...prev, 
+        isTopLevel: checked,
+        reportsTo: checked ? null : prev.reportsTo // Clear reportsTo if top level
+      }));
+    } else if (name === 'reportsTo') {
+      setNewPosition((prev) => ({ ...prev, reportsTo: value ? value : null }));
+    } else {
+      setNewPosition((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleAddPosition = async (e) => {
@@ -105,22 +124,62 @@ const Settings = () => {
     setSubmittingPosition(true);
 
     try {
+      // Validation
       if (!newPosition.title || !newPosition.department) {
         setNewPositionError('Title and Department are required');
         setSubmittingPosition(false);
         return;
       }
 
-      const result = await positionService.createPosition({
+      // Validate top-level position requires gross salary
+      if (newPosition.isTopLevel && !newPosition.grossSalary) {
+        setNewPositionError('Gross Salary is required for top-level positions (CEO, Chairman, etc.)');
+        setSubmittingPosition(false);
+        return;
+      }
+
+      // Validate salary ranges
+      if (newPosition.salary_range_min && newPosition.salary_range_max) {
+        if (Number(newPosition.salary_range_min) > Number(newPosition.salary_range_max)) {
+          setNewPositionError('Minimum salary cannot be greater than maximum salary');
+          setSubmittingPosition(false);
+          return;
+        }
+      }
+
+      const positionData = {
         title: newPosition.title,
         department: newPosition.department,
+        description: newPosition.description || undefined,
         level: newPosition.level,
-        reportsTo: newPosition.reportsTo || undefined,
-      });
+        isTopLevel: newPosition.isTopLevel,
+        reportsTo: newPosition.isTopLevel ? null : (newPosition.reportsTo || undefined),
+        grossSalary: newPosition.grossSalary ? Number(newPosition.grossSalary) : undefined,
+        salary_range_min: newPosition.salary_range_min ? Number(newPosition.salary_range_min) : undefined,
+        salary_range_max: newPosition.salary_range_max ? Number(newPosition.salary_range_max) : undefined,
+        benefits: newPosition.benefits ? newPosition.benefits.split(',').map(b => b.trim()).filter(Boolean) : [],
+        responsibilities: newPosition.responsibilities ? newPosition.responsibilities.split(',').map(r => r.trim()).filter(Boolean) : [],
+        requirements: newPosition.requirements ? newPosition.requirements.split(',').map(r => r.trim()).filter(Boolean) : [],
+      };
 
+      await positionService.createPosition(positionData);
       await fetchPositions();
+      toast.success('Position created successfully!');
       setShowPositionModal(false);
-      setNewPosition({ title: '', department: '', reportsTo: null, level: 'mid' });
+      setNewPosition({ 
+        title: '', 
+        department: '', 
+        description: '',
+        reportsTo: null, 
+        isTopLevel: false,
+        level: 'mid',
+        grossSalary: '',
+        salary_range_min: '',
+        salary_range_max: '',
+        benefits: '',
+        responsibilities: '',
+        requirements: '',
+      });
     } catch (err) {
       setNewPositionError(err.message || 'Failed to create position');
     } finally {
@@ -152,30 +211,67 @@ const Settings = () => {
 
   const renderPositionTree = (pos, level = 0) => (
     <div key={pos._id || pos.id} className="ml-4">
-      <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-lg mb-2 hover:bg-white/10 transition-all">
+      <div className="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-lg mb-2 hover:bg-white/10 transition-all">
         {pos.children && pos.children.length > 0 && (
-          <button onClick={() => toggleExpanded(pos._id || pos.id)} className="text-cyan-400">
+          <button onClick={() => toggleExpanded(pos._id || pos.id)} className="text-cyan-400 mt-1">
             {expandedPositions.has(pos._id || pos.id) ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
           </button>
         )}
         {(!pos.children || pos.children.length === 0) && <div className="w-6" />}
 
-        <div className="flex-1">
-          <p className="font-semibold text-white">{pos.title}</p>
-          <p className="text-xs text-slate-400">{pos.department}</p>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="font-semibold text-white">{pos.title}</p>
+            {pos.positionId && (
+              <Badge variant="gray" className="text-xs">ID: {pos.positionId}</Badge>
+            )}
+            {pos.isTopLevel && (
+              <Badge variant="purple" className="text-xs">Top Level</Badge>
+            )}
+          </div>
+          
+          <p className="text-xs text-slate-400 mb-2">{pos.department}</p>
+          
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <Badge variant="blue">{pos.level}</Badge>
             <span className="text-xs text-slate-300 flex items-center gap-1">
-              <Users size={12} /> {pos.employees || 0} employee{(pos.employees || 0) !== 1 ? 's' : ''}
+              <Users size={12} /> {pos.employeeCount || 0} employee{(pos.employeeCount || 0) !== 1 ? 's' : ''}
             </span>
+            {pos.grossSalary && (
+              <span className="text-xs text-emerald-300">
+                Salary: ${pos.grossSalary.toLocaleString()}
+              </span>
+            )}
+            {pos.salary_range_min && pos.salary_range_max && (
+              <span className="text-xs text-cyan-300">
+                Range: ${pos.salary_range_min.toLocaleString()} - ${pos.salary_range_max.toLocaleString()}
+              </span>
+            )}
           </div>
+
+          {pos.description && (
+            <p className="text-xs text-slate-400 mt-1 line-clamp-2">{pos.description}</p>
+          )}
+          
+          {pos.reportsTo && (
+            <p className="text-xs text-slate-500 mt-1">
+              Reports to: <span className="text-slate-300">{pos.reportsTo.title}</span>
+            </p>
+          )}
         </div>
 
         <div className="flex gap-2">
-          <button className="p-2 hover:bg-cyan-500/20 rounded-lg transition-all">
+          <button 
+            className="p-2 hover:bg-cyan-500/20 rounded-lg transition-all"
+            title="Edit Position"
+          >
             <Edit2 size={16} className="text-cyan-400" />
           </button>
-          <button onClick={() => handleDeletePosition(pos._id || pos.id)} className="p-2 hover:bg-red-500/20 rounded-lg transition-all">
+          <button 
+            onClick={() => handleDeletePosition(pos._id || pos.id)} 
+            className="p-2 hover:bg-red-500/20 rounded-lg transition-all"
+            title="Delete Position"
+          >
             <Trash2 size={16} className="text-red-400" />
           </button>
         </div>
@@ -467,75 +563,228 @@ const Settings = () => {
         )}
       </div>
 
-      {/* Position Modal */}
-      <Modal isOpen={showPositionModal} title="Add Position" onClose={() => setShowPositionModal(false)}>
-        <div className="space-y-4">
+      {/* Position Modal - Enhanced */}
+      <Modal isOpen={showPositionModal} title="Add New Position" onClose={() => setShowPositionModal(false)}>
+        <div className="max-h-[80vh] overflow-y-auto pr-2">
           {newPositionError && (
-            <div className="p-3 bg-red-500/20 border border-red-400/50 rounded-lg">
+            <div className="p-3 bg-red-500/20 border border-red-400/50 rounded-lg mb-4">
               <p className="text-red-300 text-sm">{newPositionError}</p>
             </div>
           )}
           
           <form onSubmit={handleAddPosition} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Position Title</label>
-              <input
-                type="text"
-                name="title"
-                value={newPosition.title}
-                onChange={handlePositionChange}
-                placeholder="e.g., Senior Developer"
-                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                required
-              />
+            {/* Basic Information */}
+            <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+              <h4 className="font-semibold text-white text-sm uppercase tracking-wide">Basic Information</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Position Title <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={newPosition.title}
+                  onChange={handlePositionChange}
+                  placeholder="e.g., Chief Executive Officer, Senior Developer"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Department <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="department"
+                  value={newPosition.department}
+                  onChange={handlePositionChange}
+                  placeholder="e.g., Executive, Engineering, Sales"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
+                <textarea
+                  name="description"
+                  value={newPosition.description}
+                  onChange={handlePositionChange}
+                  placeholder="Brief description of the position..."
+                  rows={2}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Department</label>
-              <input
-                type="text"
-                name="department"
-                value={newPosition.department}
-                onChange={handlePositionChange}
-                placeholder="e.g., Engineering"
-                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                required
-              />
+
+            {/* Hierarchy */}
+            <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+              <h4 className="font-semibold text-white text-sm uppercase tracking-wide">Reporting Hierarchy</h4>
+              
+              <div className="flex items-center gap-3 p-3 bg-cyan-500/10 border border-cyan-400/30 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="isTopLevel"
+                  name="isTopLevel"
+                  checked={newPosition.isTopLevel}
+                  onChange={handlePositionChange}
+                  className="w-4 h-4 rounded border-white/20 accent-cyan-400"
+                />
+                <div>
+                  <label htmlFor="isTopLevel" className="block font-medium text-white cursor-pointer">
+                    Top-Level Position (CEO, Chairman, etc.)
+                  </label>
+                  <p className="text-xs text-slate-300 mt-1">
+                    Check this if position doesn't report to anyone
+                  </p>
+                </div>
+              </div>
+
+              {!newPosition.isTopLevel && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Reports To</label>
+                  <select
+                    name="reportsTo"
+                    value={newPosition.reportsTo || ''}
+                    onChange={handlePositionChange}
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  >
+                    <option value="">Select reporting position</option>
+                    {positions.map((pos) => (
+                      <option key={pos._id || pos.id} value={pos._id || pos.id}>
+                        {pos.title} - {pos.department}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Level</label>
+                <select
+                  name="level"
+                  value={newPosition.level}
+                  onChange={handlePositionChange}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                >
+                  <option value="junior">Junior Level</option>
+                  <option value="mid">Mid Level</option>
+                  <option value="senior">Senior Level</option>
+                  <option value="executive">Executive Level</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Level</label>
-              <select
-                name="level"
-                value={newPosition.level}
-                onChange={handlePositionChange}
-                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              >
-                <option value="junior">Junior</option>
-                <option value="mid">Mid-Level</option>
-                <option value="senior">Senior</option>
-                <option value="executive">Executive</option>
-              </select>
+
+            {/* Compensation */}
+            <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+              <h4 className="font-semibold text-white text-sm uppercase tracking-wide">Compensation</h4>
+              
+              {newPosition.isTopLevel && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Gross Salary <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="grossSalary"
+                    value={newPosition.grossSalary}
+                    onChange={handlePositionChange}
+                    placeholder="e.g., 150000"
+                    min="0"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    required={newPosition.isTopLevel}
+                  />
+                  <p className="text-xs text-amber-300 mt-1">
+                    Required for top-level positions
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Salary Range Min</label>
+                  <input
+                    type="number"
+                    name="salary_range_min"
+                    value={newPosition.salary_range_min}
+                    onChange={handlePositionChange}
+                    placeholder="e.g., 50000"
+                    min="0"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Salary Range Max</label>
+                  <input
+                    type="number"
+                    name="salary_range_max"
+                    value={newPosition.salary_range_max}
+                    onChange={handlePositionChange}
+                    placeholder="e.g., 80000"
+                    min="0"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Reports To</label>
-              <select
-                name="reportsTo"
-                value={newPosition.reportsTo || ''}
-                onChange={handlePositionChange}
-                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              >
-                <option value="">None (Top Level)</option>
-                {positions.map((pos) => (
-                  <option key={pos._id || pos.id} value={pos._id || pos.id}>
-                    {pos.title}
-                  </option>
-                ))}
-              </select>
+
+            {/* Additional Details */}
+            <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-lg">
+              <h4 className="font-semibold text-white text-sm uppercase tracking-wide">Additional Details</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Benefits</label>
+                <textarea
+                  name="benefits"
+                  value={newPosition.benefits}
+                  onChange={handlePositionChange}
+                  placeholder="Enter benefits separated by commas (e.g., Health Insurance, Retirement Plan, Stock Options)"
+                  rows={2}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Key Responsibilities</label>
+                <textarea
+                  name="responsibilities"
+                  value={newPosition.responsibilities}
+                  onChange={handlePositionChange}
+                  placeholder="Enter responsibilities separated by commas"
+                  rows={3}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Requirements</label>
+                <textarea
+                  name="requirements"
+                  value={newPosition.requirements}
+                  onChange={handlePositionChange}
+                  placeholder="Enter requirements separated by commas (e.g., Bachelor's Degree, 5+ years experience)"
+                  rows={3}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                />
+              </div>
             </div>
-            <div className="flex gap-2 pt-4">
+
+            <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={submittingPosition} className="flex-1">
-                {submittingPosition ? 'Creating...' : 'Save Position'}
+                {submittingPosition ? 'Creating Position...' : 'Create Position'}
               </Button>
-              <Button variant="secondary" type="button" className="flex-1" onClick={() => setShowPositionModal(false)}>
+              <Button 
+                variant="secondary" 
+                type="button" 
+                className="flex-1" 
+                onClick={() => {
+                  setShowPositionModal(false);
+                  setNewPositionError(null);
+                }}
+              >
                 Cancel
               </Button>
             </div>

@@ -4,6 +4,7 @@ import MainLayout from '../layouts/MainLayout';
 import { Card, Button, Badge, Table, Input, Modal } from '../components/UI';
 import { EMPLOYEE_STATUS, DEPARTMENTS } from '../utils/constants';
 import employeeService from '../services/employeeService';
+import positionService from '../services/positionService';
 import toast from 'react-hot-toast';
 
 const Employees = () => {
@@ -14,6 +15,7 @@ const Employees = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [employees, setEmployees] = useState([]);
+  const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
@@ -22,16 +24,28 @@ const Employees = () => {
     email: '',
     phone: '',
     department: '',
-    designation: '',
+    position: '', // Changed from designation to position
     salary: '',
     joiningDate: new Date().toISOString().split('T')[0],
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch employees on mount
+  // Fetch employees and positions on mount
   useEffect(() => {
     fetchEmployees();
+    fetchPositions();
   }, []);
+
+  const fetchPositions = async () => {
+    try {
+      const data = await positionService.getPositions();
+      const posList = Array.isArray(data) ? data : data.positions || [];
+      setPositions(posList.filter(p => p.status === 'active'));
+    } catch (err) {
+      console.error('Failed to load positions:', err);
+      setPositions([]);
+    }
+  };
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -89,9 +103,10 @@ const Employees = () => {
         firstName: '',
         lastName: '',
         email: '',
+        password: '',
         phone: '',
         department: '',
-        designation: '',
+        position: '',
         salary: '',
         joiningDate: new Date().toISOString().split('T')[0],
       });
@@ -393,60 +408,73 @@ const Employees = () => {
           <form onSubmit={handleAddEmployee} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">First Name *</label>
                 <input
                   type="text"
                   required
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                   placeholder="John"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Last Name *</label>
                 <input
                   type="text"
                   required
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                   placeholder="Doe"
                 />
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Email *</label>
               <input
                 type="email"
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="john@company.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Password *</label>
+              <input
+                type="password"
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                placeholder="Minimum 6 characters"
+                minLength={6}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Phone</label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="+1 (555) 123-4567"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Department *</label>
                 <select
                   required
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   <option value="">Select Department</option>
                   {DEPARTMENTS.map((dept) => (
@@ -455,43 +483,63 @@ const Employees = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Designation *</label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-slate-300 mb-2">Position *</label>
+                <select
                   required
-                  value={formData.designation}
-                  onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                  placeholder="Software Engineer"
-                />
+                  value={formData.position}
+                  onChange={(e) => {
+                    const selectedPos = positions.find(p => (p._id || p.id) === e.target.value);
+                    setFormData({ 
+                      ...formData, 
+                      position: e.target.value,
+                      department: selectedPos?.department || formData.department,
+                      salary: selectedPos?.grossSalary || formData.salary
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                >
+                  <option value="">Select Position</option>
+                  {positions.length === 0 && (
+                    <option value="" disabled>No positions available - Create one in Settings</option>
+                  )}
+                  {positions.map((pos) => (
+                    <option key={pos._id || pos.id} value={pos._id || pos.id}>
+                      {pos.title} - {pos.department} {pos.positionId ? `(${pos.positionId})` : ''}
+                    </option>
+                  ))}
+                </select>
+                {positions.length === 0 && (
+                  <p className="text-xs text-amber-400 mt-1">⚠️ Create positions in Settings first</p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Salary</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Salary</label>
                 <input
                   type="number"
                   value={formData.salary}
                   onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                   placeholder="50000"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Joining Date</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Joining Date *</label>
                 <input
                   type="date"
+                  required
                   value={formData.joiningDate}
                   onChange={(e) => setFormData({ ...formData, joiningDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4 border-t border-gray-200">
+            <div className="flex gap-3 pt-4 border-t border-white/10">
               <Button type="submit" className="flex-1" disabled={submitting}>
-                {submitting ? 'Adding...' : 'Add Employee'}
+                {submitting ? 'Adding Employee...' : 'Add Employee'}
               </Button>
               <Button type="button" variant="secondary" className="flex-1" onClick={() => setShowAddModal(false)}>
                 Cancel
