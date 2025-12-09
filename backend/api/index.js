@@ -22,21 +22,39 @@ dotenv.config();
 
 const app = express();
 
-// Connect to DB and seed (await connection before seeding)
-(async () => {
+// Initialize DB connection and seed
+let dbInitialized = false;
+const initDB = async () => {
+  if (dbInitialized) return;
   try {
     await connectDB();
     console.log('[Vercel] DB connected, running seed...');
     await seedDevData();
     console.log('[Vercel] Seed complete');
+    dbInitialized = true;
   } catch (err) {
     console.error('[Vercel] Init error:', err);
+    throw err;
   }
-})();
+};
+
+// Initialize on module load
+initDB().catch(console.error);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Ensure DB is initialized before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await initDB();
+    next();
+  } catch (err) {
+    console.error('[Vercel] DB init failed:', err);
+    res.status(500).json({ message: 'Database initialization failed' });
+  }
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
