@@ -55,7 +55,7 @@ const LeaveManagement = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await approvalService.getAll();
+      const data = await approvalService.getApprovals();
       const records = Array.isArray(data) ? data : data.approvals || [];
       setLeaveRecords(records);
     } catch (err) {
