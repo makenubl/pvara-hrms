@@ -2,7 +2,7 @@ import api from './api';
 
 const approvalService = {
   getPendingForMe: () =>
-    api.get('/approvals/pending'),
+    api.get('/approvals/pending/me'),
 
   getApprovals: (filters = {}) =>
     api.get('/approvals', { params: filters }),
