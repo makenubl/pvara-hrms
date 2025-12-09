@@ -476,9 +476,9 @@ const Employees = () => {
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
-                  <option value="">Select Department</option>
+                  <option value="" className="bg-slate-800 text-white">Select Department</option>
                   {DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
+                    <option key={dept} value={dept} className="bg-slate-800 text-white">{dept}</option>
                   ))}
                 </select>
               </div>
@@ -498,12 +498,12 @@ const Employees = () => {
                   }}
                   className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
-                  <option value="">Select Position</option>
+                  <option value="" className="bg-slate-800 text-white">Select Position</option>
                   {positions.length === 0 && (
-                    <option value="" disabled>No positions available - Create one in Settings</option>
+                    <option value="" disabled className="bg-slate-800 text-white">No positions available - Create one in Settings</option>
                   )}
                   {positions.map((pos) => (
-                    <option key={pos._id || pos.id} value={pos._id || pos.id}>
+                    <option key={pos._id || pos.id} value={pos._id || pos.id} className="bg-slate-800 text-white">
                       {pos.title} - {pos.department} {pos.positionId ? `(${pos.positionId})` : ''}
                     </option>
                   ))}

@@ -178,9 +178,9 @@ export const Select = ({
       }`}
       {...props}
     >
-      <option value="">Select {label}</option>
+      <option value="" className="bg-slate-800 text-white">Select {label}</option>
       {options?.map((option) => (
-        <option key={option.value} value={option.value} className="text-slate-900">
+        <option key={option.value} value={option.value} className="bg-slate-800 text-white">
           {option.label}
         </option>
       ))}
