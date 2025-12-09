@@ -43,7 +43,13 @@ initDB().catch(console.error);
 
 // Middleware
 app.use(cors({
-  origin: ['https://pvara.team', 'https://www.pvara.team', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: [
+    'https://pvara.team',
+    'https://www.pvara.team',
+    'https://pvara-hrms-prod-v2.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
