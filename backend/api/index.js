@@ -75,4 +75,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Manual seed endpoint for debugging
+app.post('/api/seed', async (req, res) => {
+  try {
+    await initDB();
+    await seedDevData();
+    res.json({ message: 'Seed completed successfully' });
+  } catch (err) {
+    console.error('[Seed endpoint] Error:', err);
+    res.status(500).json({ message: err.message, stack: err.stack });
+  }
+});
+
 export default app;
