@@ -22,11 +22,17 @@ dotenv.config();
 
 const app = express();
 
-// Connect to DB (fail fast with stack trace if connection fails)
-connectDB();
-
-// Seed dev/initial data on cold start (no-op if already seeded)
-seedDevData().catch((err) => console.error('Seed error', err));
+// Connect to DB and seed (await connection before seeding)
+(async () => {
+  try {
+    await connectDB();
+    console.log('[Vercel] DB connected, running seed...');
+    await seedDevData();
+    console.log('[Vercel] Seed complete');
+  } catch (err) {
+    console.error('[Vercel] Init error:', err);
+  }
+})();
 
 // Middleware
 app.use(cors());

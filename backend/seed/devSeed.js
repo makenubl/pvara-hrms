@@ -11,7 +11,11 @@ const TEST_USERS = [
 
 const seedDevData = async () => {
   const existingAdmin = await User.findOne({ email: 'admin@pvara.com' });
-  if (existingAdmin) return;
+  if (existingAdmin) {
+    console.log('[Seed] Admin already exists, skipping seed');
+    return;
+  }
+  console.log('[Seed] Creating test users...');
 
   const company = await Company.create({
     name: 'PVARA HRMS Demo',
@@ -31,7 +35,9 @@ const seedDevData = async () => {
       company: company._id,
       status: 'active',
     });
+    console.log(`[Seed] Created user: ${u.email}`);
   }
+  console.log('[Seed] All test users created successfully');
 };
 
 export default seedDevData;
