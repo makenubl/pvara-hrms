@@ -140,8 +140,8 @@ const LeaveManagement = () => {
       const end = new Date(formData.endDate);
       const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-      await approvalService.create({
-        type: 'leave',
+      await approvalService.createApproval({
+        requestType: 'leave',
         leaveType: formData.leaveType,
         startDate: formData.startDate,
         endDate: formData.endDate,

@@ -75,7 +75,7 @@ const Settings = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await positionService.getHierarchy();
+      const data = await positionService.getPositions();
       setPositions(Array.isArray(data) ? data : data.positions || []);
     } catch (err) {
       setError(err.message || 'Failed to load positions');
@@ -111,7 +111,7 @@ const Settings = () => {
         return;
       }
 
-      const result = await positionService.create({
+      const result = await positionService.createPosition({
         title: newPosition.title,
         department: newPosition.department,
         level: newPosition.level,
